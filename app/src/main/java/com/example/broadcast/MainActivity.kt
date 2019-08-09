@@ -4,6 +4,7 @@ import android.content.Intent
 import android.os.Bundle
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
+import com.google.android.material.textfield.TextInputEditText
 
 class MainActivity : AppCompatActivity() {
 
@@ -13,6 +14,13 @@ class MainActivity : AppCompatActivity() {
     }
 
     fun StartParty(view: View) {
-        startActivity(Intent(this, ReceiverActivity::class.java))
+        startActivity(Intent(this, TransmitterActivity::class.java))
+    }
+
+    fun JoinParty(view: View) {
+        var ReceiverIntent = Intent(this, ReceiverActivity::class.java)
+        val data = findViewById<TextInputEditText>(R.id.IPPoirtInput)
+        ReceiverIntent.putExtra(ReceiverActivity.IPPort, data.text.toString())
+        startActivity(ReceiverIntent)
     }
 }

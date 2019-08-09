@@ -7,10 +7,18 @@ import androidx.appcompat.app.AppCompatActivity
 
 class ReceiverActivity : AppCompatActivity() {
 
+    companion object {
+        const val IPPort = "IP:Port_of_connection"
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_receiver)
         bar()
+
+        val data = intent.getStringExtra(IPPort)
+        val textview = findViewById<TextView>(R.id.IPPortReceiverTextView)
+        textview.setText(data)
 
         val middle: Int = findViewById<SeekBar>(R.id.DelayBar).max / 2
         findViewById<SeekBar>(R.id.DelayBar).progress = middle
