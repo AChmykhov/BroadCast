@@ -66,5 +66,10 @@
                 android:background="@color/colorReceiverBackground"
                 android:progressBackgroundTint="@color/colorBar"/>
     </LinearLayout>
+    <TextView
+            android:text="IP:Port"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" tools:layout_editor_absoluteY="181dp"
+            tools:layout_editor_absoluteX="16dp" android:id="@+id/IPPortReceiverTextView" android:textSize="25sp"/>
 
 </androidx.constraintlayout.widget.ConstraintLayout>
