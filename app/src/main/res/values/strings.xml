@@ -1,4 +1,7 @@
 <resources>
     <string name="app_name">BroadCast</string>
-    <string name="start_serverbtt">start server</string>
+    <string name="start_party">Start Party</string>
+    <string name="or_you_can">Or you can</string>
+    <string name="join_party">Join Party</string>
+    <string name="ip_port">IP:Port</string>
 </resources>
