@@ -24,15 +24,18 @@
         <Button
                 android:text="Change"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content" android:id="@+id/ChangeSongButton" android:layout_weight="1"/>
+                android:layout_height="wrap_content" android:id="@+id/ChangeSongButton" android:layout_weight="1"
+                android:onClick="changeSong"/>
         <Button
                 android:text="Stop"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content" android:id="@+id/StopButton" android:layout_weight="1"/>
+                android:layout_height="wrap_content" android:id="@+id/StopButton" android:layout_weight="1"
+                android:onClick="stopSong"/>
         <Button
                 android:text="Resume"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content" android:id="@+id/ResumeButton" android:layout_weight="1"/>
+                android:layout_height="wrap_content" android:id="@+id/ResumeButton" android:layout_weight="1"
+                android:onClick="resumeSong"/>
     </LinearLayout>
     <Button
             android:text="Exit"
