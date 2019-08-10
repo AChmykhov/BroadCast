@@ -69,7 +69,16 @@
     <TextView
             android:text="IP:Port"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content" tools:layout_editor_absoluteY="181dp"
-            tools:layout_editor_absoluteX="16dp" android:id="@+id/IPPortReceiverTextView" android:textSize="25sp"/>
+            android:layout_height="wrap_content"
+            android:id="@+id/IPPortReceiverTextView" android:textSize="25sp"
+            app:layout_constraintTop_toTopOf="parent" app:layout_constraintStart_toStartOf="parent"
+            android:layout_marginTop="181dp" android:layout_marginStart="16dp"/>
+    <Button
+            android:text="Exit"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/w"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent" android:onClick="exitFromParty"/>
 
 </androidx.constraintlayout.widget.ConstraintLayout>
