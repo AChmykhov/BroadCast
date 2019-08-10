@@ -24,6 +24,9 @@ android {
 }
 
 dependencies {
+    implementation "io.ktor:ktor-server-core:1.0.0"
+    implementation "io.ktor:ktor-server-netty:1.0.0"
+    implementation 'com.android.volley:volley:1.1.1'
     implementation fileTree(dir: 'libs', include: ['*.jar'])
     implementation"org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
     implementation 'androidx.appcompat:appcompat:1.0.2'
