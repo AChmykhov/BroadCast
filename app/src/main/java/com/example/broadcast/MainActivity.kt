@@ -1,26 +1,28 @@
 package com.example.broadcast
 
-import android.content.Intent
-import android.os.Bundle
-import android.view.View
+import android.content.Context
 import androidx.appcompat.app.AppCompatActivity
-import com.google.android.material.textfield.TextInputEditText
+import android.os.Bundle
+import android.media.MediaPlayer
+import android.view.View
 
 class MainActivity : AppCompatActivity() {
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-    }
 
-    fun StartParty(view: View) {
-        startActivity(Intent(this, TransmitterActivity::class.java))
     }
+    fun Play(view: View){
+        var mediaPlayer: MediaPlayer? = MediaPlayer.create(this, R.raw.audio_test)
+        mediaPlayer?.start()
+    }
+    fun Stop(view:View){
+        var mediaPlayer: MediaPlayer? = MediaPlayer.create(this, R.raw.audio_test)
+        mediaPlayer?.release()
 
-    fun JoinParty(view: View) {
-        var ReceiverIntent = Intent(this, ReceiverActivity::class.java)
-        val data = findViewById<TextInputEditText>(R.id.IPPoirtInput)
-        ReceiverIntent.putExtra(ReceiverActivity.IPPort, data.text.toString())
-        startActivity(ReceiverIntent)
+    }
+    fun Resume(view: View){
+        var mediaPlayer: MediaPlayer? = MediaPlayer.create(this, R.raw.audio_test)
+        mediaPlayer?.start()
     }
 }
