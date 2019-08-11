@@ -14,7 +14,6 @@ import kotlinx.android.synthetic.main.activity_receiver.*
 import android.content.Intent
 import android.view.MenuItem
 
-
 class ReceiverActivity : AppCompatActivity() {
 
     companion object {
@@ -33,8 +32,6 @@ class ReceiverActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_receiver)
-
-        bar()
 
         val textview = findViewById<TextView>(R.id.IPPortReceiverTextView)
         textview.setText(getData())
@@ -58,18 +55,16 @@ class ReceiverActivity : AppCompatActivity() {
             mediaplayer.stop()
             finish()
         }
-    }
 
-    private fun bar() {
         var delaybar = findViewById<SeekBar>(R.id.DelayBar)
 
         delaybar.setOnSeekBarChangeListener(
             object : SeekBar.OnSeekBarChangeListener {
-
                 override fun onProgressChanged(seekBar: SeekBar, progress: Int, b: Boolean) {
                     var delaytext = findViewById<TextView>(R.id.DelayTextView)
                     val delay: Int = progress - delaybar.max / 2
                     delaytext.setText(delay.toString())
+                    mediaplayer.seekTo(mediaplayer.currentPosition+getDelay())
                 }
 
                 override fun onStartTrackingTouch(seekBar: SeekBar) {}
@@ -77,6 +72,7 @@ class ReceiverActivity : AppCompatActivity() {
                 override fun onStopTrackingTouch(seekBar: SeekBar) {}
             }
         )
+
     }
 
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
