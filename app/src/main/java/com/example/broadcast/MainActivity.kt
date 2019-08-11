@@ -36,13 +36,13 @@ class MainActivity : AppCompatActivity() {
         init {
             val textView = findViewById<TextView>(R.id.text)
             start(NanoHTTPD.SOCKET_READ_TIMEOUT, false)
-            textView.text = "Hooray!"
+            textView.text = "Horay!"
         }
 
         @RequiresApi(Build.VERSION_CODES.O)
         override fun serve(session: IHTTPSession): NanoHTTPD.Response {
 
-            return NanoHTTPD.newChunkedResponse(Response.Status.OK, "mp3", converter(path))
+            return NanoHTTPD.newChunkedResponse(Response.Status.OK, "mp3", converter(path)?.inputStream())
         }
 
     }
