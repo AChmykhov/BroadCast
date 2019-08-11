@@ -17,14 +17,13 @@ import com.android.volley.Request
 import com.android.volley.Response
 import com.android.volley.toolbox.StringRequest
 import com.android.volley.toolbox.Volley
+import com.nbsp.materialfilepicker.MaterialFilePicker
+import com.nbsp.materialfilepicker.ui.FilePickerActivity
 import fi.iki.elonen.NanoHTTPD
 import java.io.IOException
 import java.nio.file.Files
 import java.nio.file.Paths
-import java.util.*
-
-
-
+import java.util.regex.Pattern
 
 
 class MainActivity : AppCompatActivity() {
@@ -47,11 +46,11 @@ class MainActivity : AppCompatActivity() {
 
     @RequiresApi(Build.VERSION_CODES.O)
     fun converter(path: String): ByteArray? {
-        try {
+        return try {
             val encoded = Files.readAllBytes(Paths.get(path))
-            return encoded
+            encoded
         } catch (e: IOException) {
-            return null
+            null
         }
     }
 
@@ -133,7 +132,7 @@ class MainActivity : AppCompatActivity() {
 
         if (requestCode == 1000 && resultCode == Activity.RESULT_OK) {
             val filePath = data!!.getStringExtra(FilePickerActivity.RESULT_FILE_PATH)
-            path = filePath
+            val path = filePath
         }
     }
 
