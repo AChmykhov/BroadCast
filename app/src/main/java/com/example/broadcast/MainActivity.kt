@@ -16,6 +16,8 @@ import java.io.IOException
 
 
 
+
+
 class MainActivity : AppCompatActivity() {
 
     inner class App @Throws(IOException::class) constructor() : NanoHTTPD(8080) {
@@ -60,14 +62,16 @@ class MainActivity : AppCompatActivity() {
 
     }
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-
+    fun run_serv(args: Array<String>) {
         try {
             App()
         } catch (ioe: IOException) {
             System.err.println("Couldn't start server:\n$ioe")
         }
 
+    }
+
+    override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         val textView = findViewById<TextView>(R.id.text)
