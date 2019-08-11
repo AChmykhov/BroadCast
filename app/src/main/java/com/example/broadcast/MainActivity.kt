@@ -41,6 +41,8 @@ class MainActivity : AppCompatActivity() {
 
     }
 
+
+
     private fun getLocalIpAddress(): String? {
         try {
 
@@ -76,6 +78,8 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         val textView = findViewById<TextView>(R.id.text)
+        val textView1 = findViewById<TextView>(R.id.textView)
+        textView1.text = getLocalIpAddress()
 // ...
 
 // Instantiate the RequestQueue.
