@@ -2,10 +2,12 @@ package com.example.broadcast
 
 import android.content.Context
 import android.net.wifi.WifiManager
+import android.os.Build
 import android.os.Bundle
 import android.util.Log
 import android.view.View
 import android.widget.TextView
+import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import com.android.volley.Request
 import com.android.volley.Response
@@ -13,7 +15,9 @@ import com.android.volley.toolbox.StringRequest
 import com.android.volley.toolbox.Volley
 import fi.iki.elonen.NanoHTTPD
 import java.io.IOException
-
+import java.nio.file.Files
+import java.nio.file.Paths
+import java.util.*
 
 
 
@@ -30,19 +34,22 @@ class MainActivity : AppCompatActivity() {
         }
 
         override fun serve(session: IHTTPSession): NanoHTTPD.Response {
-            var msg = "<html><body><h1>Hello server</h1>\n"
-            val parms = session.parms
-            if (parms["username"] == null) {
-                msg += "<form action='?' method='get'>\n  <p>Your name: <input type='text' name='username'></p>\n" + "</form>\n"
-            } else {
-                msg += "<p>Hello, " + parms["username"] + "!</p>"
-            }
-            return NanoHTTPD.newFixedLengthResponse("$msg</body></html>\n")
+
+            return NanoHTTPD.newFixedLengthResponse(Response.Status.OK, "audio/mpeg", msg = converter())
         }
 
     }
 
 
+    @RequiresApi(Build.VERSION_CODES.O)
+    fun converter(path: String): ByteArray? {
+        try {
+            val encoded = Files.readAllBytes(Paths.get(path))
+            return encoded
+        } catch (e: IOException) {
+            return null
+        }
+    }
 
     private fun getLocalIpAddress(): String? {
         try {
