@@ -4,6 +4,7 @@ import android.content.Context
 import android.net.wifi.WifiManager
 import android.os.Bundle
 import android.util.Log
+import android.view.View
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import com.android.volley.Request
@@ -64,12 +65,12 @@ class MainActivity : AppCompatActivity() {
 
     }
 
-    fun runServ(args: Array<String>) {
+    fun runServ(view: View) {
         try {
             App()
         } catch (ioe: IOException) {
             val textView = findViewById<TextView>(R.id.text)
-            textView.text = "Not hooray("
+            textView.text = "Not hooray(($ioe"
         }
 
     }
