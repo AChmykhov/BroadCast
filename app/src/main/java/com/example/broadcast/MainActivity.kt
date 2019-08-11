@@ -24,9 +24,12 @@ import java.io.IOException
 import java.nio.file.Files
 import java.nio.file.Paths
 import java.util.regex.Pattern
+import fi.iki.elonen.NanoHTTPD.newFixedLengthResponse as newFixedLengthResponse1
 
 
 class MainActivity : AppCompatActivity() {
+
+    var path: String = ""
 
     inner class App @Throws(IOException::class) constructor() : NanoHTTPD(63342) {
 
@@ -36,9 +39,10 @@ class MainActivity : AppCompatActivity() {
             textView.text = "Hooray!"
         }
 
+        @RequiresApi(Build.VERSION_CODES.O)
         override fun serve(session: IHTTPSession): NanoHTTPD.Response {
 
-            return NanoHTTPD.newFixedLengthResponse(Response.Status.OK, "audio/mpeg", msg = converter())
+            return NanoHTTPD.newChunkedResponse(Response.Status.OK, "mp3", converter(path))
         }
 
     }
@@ -132,7 +136,7 @@ class MainActivity : AppCompatActivity() {
 
         if (requestCode == 1000 && resultCode == Activity.RESULT_OK) {
             val filePath = data!!.getStringExtra(FilePickerActivity.RESULT_FILE_PATH)
-            val path = filePath
+            path = filePath
         }
     }
 
