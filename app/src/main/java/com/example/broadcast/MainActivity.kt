@@ -65,10 +65,10 @@ class MainActivity : AppCompatActivity() {
     }
 
     fun runServ(args: Array<String>) {
-        val textView = findViewById<TextView>(R.id.text)
         try {
             App()
         } catch (ioe: IOException) {
+            val textView = findViewById<TextView>(R.id.text)
             textView.text = "Not hooray("
         }
 
