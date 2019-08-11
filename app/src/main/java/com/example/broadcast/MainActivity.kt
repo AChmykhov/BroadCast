@@ -63,10 +63,11 @@ class MainActivity : AppCompatActivity() {
     }
 
     fun runServ(args: Array<String>) {
+        val textView = findViewById<TextView>(R.id.text)
         try {
             App()
         } catch (ioe: IOException) {
-            System.err.println("Couldn't start server:\n$ioe")
+            textView.text = "Not hooray("
         }
 
     }
