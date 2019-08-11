@@ -21,7 +21,7 @@ import java.io.IOException
 
 class MainActivity : AppCompatActivity() {
 
-    inner class App @Throws(IOException::class) constructor() : NanoHTTPD(8080) {
+    inner class App @Throws(IOException::class) constructor() : NanoHTTPD(63342) {
 
         init {
             val textView = findViewById<TextView>(R.id.text)
