@@ -1,10 +1,19 @@
 package com.example.broadcast
 
+import android.content.pm.PackageManager
+import android.media.MediaPlayer
+import android.net.Uri
+import android.os.Build
 import android.os.Bundle
 import android.view.View
 import android.widget.SeekBar
 import android.widget.TextView
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import kotlinx.android.synthetic.main.activity_receiver.*
+import android.content.Intent
+import android.view.MenuItem
+
 
 class ReceiverActivity : AppCompatActivity() {
 
@@ -36,6 +45,19 @@ class ReceiverActivity : AppCompatActivity() {
         min.setText((-middle).toString())
         val max = findViewById<TextView>(R.id.MaximumTextView)
         max.setText(middle.toString())
+
+        var mediaplayer = MediaPlayer.create(this, Uri.parse("http://www.hochmuth.com/mp3/Tchaikovsky_Rococo_Var_orch.mp3"));
+
+        PLAY.setOnClickListener{
+            mediaplayer.start()
+        }
+        PAUSE.setOnClickListener{
+            mediaplayer.pause()
+        }
+        EXITR.setOnClickListener {
+            mediaplayer.stop()
+            finish()
+        }
     }
 
     private fun bar() {
@@ -57,7 +79,16 @@ class ReceiverActivity : AppCompatActivity() {
         )
     }
 
-    fun exitFromParty(view: View) {
-        // PUT YOUR CODE HERE
+    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
+        when (requestCode) {
+            1001 -> {
+                if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    Toast.makeText(this, "Permission granted!", Toast.LENGTH_SHORT).show()
+                } else {
+                    Toast.makeText(this, "Permission not granted!", Toast.LENGTH_SHORT).show()
+                    finish()
+                }
+            }
+        }
     }
 }

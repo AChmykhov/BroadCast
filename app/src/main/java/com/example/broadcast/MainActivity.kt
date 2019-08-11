@@ -19,7 +19,7 @@ class MainActivity : AppCompatActivity() {
 
     fun JoinParty(view: View) {
         var ReceiverIntent = Intent(this, ReceiverActivity::class.java)
-        val data = findViewById<TextInputEditText>(R.id.IPPoirtInput)
+        val data = findViewById(R.id.IPPoirtInput) as TextInputEditText
         ReceiverIntent.putExtra(ReceiverActivity.IPPort, data.text.toString())
         startActivity(ReceiverIntent)
     }
