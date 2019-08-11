@@ -1,12 +1,16 @@
 package com.example.broadcast
 
+import android.app.Activity
 import android.content.Context
+import android.content.Intent
+import android.content.pm.PackageManager
 import android.net.wifi.WifiManager
 import android.os.Build
 import android.os.Bundle
 import android.util.Log
 import android.view.View
 import android.widget.TextView
+import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import com.android.volley.Request
@@ -76,6 +80,7 @@ class MainActivity : AppCompatActivity() {
         try {
             App()
         } catch (ioe: IOException) {
+            System.err.println("Couldn't start server:\n$ioe")
             val textView = findViewById<TextView>(R.id.text)
             textView.text = "Not hooray(($ioe"
         }
@@ -88,6 +93,11 @@ class MainActivity : AppCompatActivity() {
         val textView = findViewById<TextView>(R.id.text)
         val textView1 = findViewById<TextView>(R.id.textView)
         textView1.text = getLocalIpAddress()
+
+        if (Build.VERSION.SDK_INT > Build.VERSION_CODES.M &&
+            checkSelfPermission(android.Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED)
+            requestPermissions(arrayOf(android.Manifest.permission.WRITE_EXTERNAL_STORAGE), 10001)
+
 // ...
 
 // Instantiate the RequestQueue.
@@ -105,5 +115,38 @@ class MainActivity : AppCompatActivity() {
             add(stringRequest)
         }
 
+    }
+
+
+    fun changeSong(view: View) {
+        MaterialFilePicker()
+            .withActivity(this)
+            .withRequestCode(1000)
+            .withFilter(Pattern.compile(".*\\.mp3$")) // Filtering files and directories by file name using regexp
+            .withFilterDirectories(false) // Set directories filterable (false by default)
+            .withHiddenFiles(true) // Show hidden files and folders
+            .start()
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+
+        if (requestCode == 1000 && resultCode == Activity.RESULT_OK) {
+            val filePath = data!!.getStringExtra(FilePickerActivity.RESULT_FILE_PATH)
+            path = filePath
+        }
+    }
+
+    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
+        when (requestCode) {
+            1001 -> {
+                if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    Toast.makeText(this, "Permission granted!", Toast.LENGTH_SHORT).show()
+                } else {
+                    Toast.makeText(this, "Permission not granted!", Toast.LENGTH_SHORT).show()
+                    finish()
+                }
+            }
+        }
     }
 }
