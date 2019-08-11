@@ -4,6 +4,7 @@ import android.content.Context
 import android.net.wifi.WifiManager
 import android.os.Bundle
 import android.util.Log
+import android.view.View
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import com.android.volley.Request
@@ -62,7 +63,7 @@ class MainActivity : AppCompatActivity() {
 
     }
 
-    fun run_serv(args: Array<String>) {
+    fun runServ(view: View) {
         try {
             App()
         } catch (ioe: IOException) {
@@ -75,6 +76,8 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         val textView = findViewById<TextView>(R.id.text)
+        val textView1 = findViewById<TextView>(R.id.textView)
+        textView1.text = getLocalIpAddress()
 // ...
 
 // Instantiate the RequestQueue.
