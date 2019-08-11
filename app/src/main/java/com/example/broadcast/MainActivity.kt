@@ -10,17 +10,34 @@ import com.android.volley.Request
 import com.android.volley.Response
 import com.android.volley.toolbox.StringRequest
 import com.android.volley.toolbox.Volley
-import io.ktor.application.call
-import io.ktor.http.ContentType
-import io.ktor.response.respondText
-import io.ktor.routing.get
-import io.ktor.routing.routing
-import io.ktor.server.engine.embeddedServer
-import io.ktor.server.netty.Netty
+import fi.iki.elonen.NanoHTTPD
+import java.io.IOException
+
 
 
 
 class MainActivity : AppCompatActivity() {
+
+    inner class App @Throws(IOException::class) constructor() : NanoHTTPD(8080) {
+
+        init {
+            val textView = findViewById<TextView>(R.id.text)
+            start(NanoHTTPD.SOCKET_READ_TIMEOUT, false)
+            textView.text = "Hooray!"
+        }
+
+        override fun serve(session: IHTTPSession): NanoHTTPD.Response {
+            var msg = "<html><body><h1>Hello server</h1>\n"
+            val parms = session.parms
+            if (parms["username"] == null) {
+                msg += "<form action='?' method='get'>\n  <p>Your name: <input type='text' name='username'></p>\n" + "</form>\n"
+            } else {
+                msg += "<p>Hello, " + parms["username"] + "!</p>"
+            }
+            return NanoHTTPD.newFixedLengthResponse("$msg</body></html>\n")
+        }
+
+    }
 
     private fun getLocalIpAddress(): String? {
         try {
@@ -43,17 +60,14 @@ class MainActivity : AppCompatActivity() {
 
     }
 
-    fun main(args: Array<String>) {
-        embeddedServer(Netty, 8080) {
-            routing {
-                get("/") {
-                    call.respondText("Hello, world!", ContentType.Text.Html)
-                }
-            }
-        }.start(wait = true)
-    }
-
     override fun onCreate(savedInstanceState: Bundle?) {
+
+        try {
+            App()
+        } catch (ioe: IOException) {
+            System.err.println("Couldn't start server:\n$ioe")
+        }
+
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         val textView = findViewById<TextView>(R.id.text)
@@ -61,14 +75,18 @@ class MainActivity : AppCompatActivity() {
 
 // Instantiate the RequestQueue.
         val queue = Volley.newRequestQueue(this)
-        val url = "192.168.212.102:8080"
+        val url = "http://www.google.com"
 // Request a string response from the provided URL.
         val stringRequest = StringRequest(Request.Method.GET, url,
-            Response.Listener<String> {response -> textView.text = response.substring(0, 20)},
+            Response.Listener<String> {},
             Response.ErrorListener { textView.text = "That didn't work!" })
 
 // Add the request to the RequestQueue.
-        queue.add(stringRequest)
+        queue.run {
+
+            // Add the request to the RequestQueue.
+            add(stringRequest)
+        }
 
     }
 }
