@@ -27,7 +27,6 @@ import java.io.IOException
 import java.nio.file.Files
 import java.nio.file.Paths
 import java.util.regex.Pattern
-import fi.iki.elonen.NanoHTTPD.newFixedLengthResponse as newFixedLengthResponse1
 
 
 class MainActivity : AppCompatActivity() {
@@ -45,20 +44,17 @@ class MainActivity : AppCompatActivity() {
         @RequiresApi(Build.VERSION_CODES.O)
         override fun serve(session: IHTTPSession): NanoHTTPD.Response {
 
-            return NanoHTTPD.newChunkedResponse(Response.Status.OK, "mp3", converter(path)?.inputStream())
+            return NanoHTTPD.newChunkedResponse(Response.Status.OK, ".mp3", converter(path).inputStream())
         }
 
     }
 
 
     @RequiresApi(Build.VERSION_CODES.O)
-    fun converter(path: String): ByteArray? {
-        return try {
-            val encoded = Files.readAllBytes(Paths.get(path))
-            encoded
-        } catch (e: IOException) {
-            null
-        }
+    fun converter(path: String): ByteArray {
+        val text = findViewById<TextView>(R.id.text)
+        text.text = path
+        return Files.readAllBytes(Paths.get(path))
     }
 
     private fun getLocalIpAddress(): String? {
@@ -142,12 +138,15 @@ class MainActivity : AppCompatActivity() {
             .start()
     }
 
+    @RequiresApi(Build.VERSION_CODES.O)
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
 
         if (requestCode == 1000 && resultCode == Activity.RESULT_OK) {
             val filePath = data!!.getStringExtra(FilePickerActivity.RESULT_FILE_PATH)
             path = filePath
+            val textView2: ByteArray
+            textView2 = converter(filePath)
         }
     }
 
