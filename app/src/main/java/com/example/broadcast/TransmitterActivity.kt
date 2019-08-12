@@ -1,5 +1,6 @@
 package com.example.broadcast
 
+import android.Manifest
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
@@ -11,49 +12,42 @@ import android.util.Log
 import android.view.View
 import android.widget.TextView
 import android.widget.Toast
+import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
 import com.nbsp.materialfilepicker.MaterialFilePicker
 import com.nbsp.materialfilepicker.ui.FilePickerActivity
-import kotlinx.android.synthetic.main.activity_receiver.*
 import kotlinx.android.synthetic.main.activity_transmitter.*
+import java.io.File
+import java.io.IOException
 import java.util.regex.Pattern
-
-
+import fi.iki.elonen.NanoHTTPD
+import kotlinx.android.synthetic.main.activity_main.*
 
 
 class TransmitterActivity : AppCompatActivity() {
 
-    private var path = "asdf"
+    var path: String = ""
 
-    fun getData(): String {
-        return "123"
-    }
+    inner class App @Throws(IOException::class) constructor() : NanoHTTPD(63342) {
 
-
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_transmitter)
-        findViewById<TextView>(R.id.ShowIPTextView).setText(getData())
-
-        if (Build.VERSION.SDK_INT > Build.VERSION_CODES.M &&
-            checkSelfPermission(android.Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED)
-            requestPermissions(arrayOf(android.Manifest.permission.WRITE_EXTERNAL_STORAGE), 10001)
-
-        val showIP = findViewById<TextView>(R.id.ShowIPTextView)
-        showIP.text = getLocalIpAddress()
-        ExitT.setOnClickListener {
-            finish()
+        init {
+            start(NanoHTTPD.SOCKET_READ_TIMEOUT, false)
         }
+
+        @RequiresApi(Build.VERSION_CODES.O)
+        override fun serve(session: IHTTPSession): NanoHTTPD.Response {
+
+            return NanoHTTPD.newChunkedResponse(Response.Status.OK, ".mp3", readFileAsTextUsingInputStream(path))
+        }
+
     }
 
-    private fun ipToString(i: Int): String {
-        return (i and 0xFF).toString() + "." +
-                (i shr 8 and 0xFF) + "." +
-                (i shr 16 and 0xFF) + "." +
-                (i shr 24 and 0xFF)
 
-    }
+    fun readFileAsTextUsingInputStream(fileName: String)
+            = File(fileName).inputStream()
+
     private fun getLocalIpAddress(): String? {
         try {
 
@@ -67,6 +61,54 @@ class TransmitterActivity : AppCompatActivity() {
         return null
     }
 
+    private fun ipToString(i: Int): String {
+        return (i and 0xFF).toString() + "." +
+                (i shr 8 and 0xFF) + "." +
+                (i shr 16 and 0xFF) + "." +
+                (i shr 24 and 0xFF)
+
+    }
+
+    fun runServ(view: View) {
+        try {
+            App()
+        } catch (ioe: IOException) {
+            System.err.println("Couldn't start server:\n$ioe")
+        }
+
+    }
+
+    fun getData(): String {
+        return getLocalIpAddress().toString()
+    }
+
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContentView(R.layout.activity_transmitter)
+        findViewById<TextView>(R.id.ShowIPTextView).setText(getData())
+
+        val thisActivity = this@TransmitterActivity
+
+        if (ContextCompat.checkSelfPermission(thisActivity,
+                Manifest.permission.WRITE_EXTERNAL_STORAGE)
+            != PackageManager.PERMISSION_GRANTED) {
+
+            if (!(ActivityCompat.shouldShowRequestPermissionRationale(thisActivity,
+                    Manifest.permission.WRITE_EXTERNAL_STORAGE))) {
+                ActivityCompat.requestPermissions(thisActivity,
+                    arrayOf(Manifest.permission.WRITE_EXTERNAL_STORAGE), 1)
+            }
+        }
+
+        val showIP = findViewById<TextView>(R.id.ShowIPTextView)
+        showIP.text = getLocalIpAddress()
+        ExitT.setOnClickListener {
+            finish()
+        }
+    }
+
+
 
     fun exitFromParty(view: View) {
         // PUT YOUR CODE HERE
@@ -77,8 +119,14 @@ class TransmitterActivity : AppCompatActivity() {
     }
 
     fun resumeSong(view: View) {
-        // PUT YOUR CODE HERE
-
+        Toast.makeText(this, "YES!", Toast.LENGTH_SHORT).show()
+        try {
+            Toast.makeText(this, "Good!", Toast.LENGTH_LONG).show()
+            runServ(view)}
+        catch (ioe: Exception) {
+            System.err.println("Couldn't start server:\n$ioe")
+            Toast.makeText(this, "$ioe", Toast.LENGTH_LONG).show()
+        }
     }
 
     fun changeSong(view: View) {
