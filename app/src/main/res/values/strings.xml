@@ -4,5 +4,15 @@
     <string name="or_you_can">Or you can</string>
     <string name="join_party">Join Party</string>
     <string name="ip_port">IP:Port</string>
+    <string name="delay">Delay:</string>
+    <string name="_0">0</string>
+    <string name="minus_100">-100</string>
+    <string name="todo">TODO</string>
+    <string name="_100">100</string>
+    <string name="ip">IP</string>
+    <string name="change">Change</string>
+    <string name="stop">Stop</string>
+    <string name="resume">Resume</string>
+    <string name="exit">exit</string>
     <string name="extvText">Here can be your exception</string>
 </resources>

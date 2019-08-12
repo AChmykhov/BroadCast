@@ -8,7 +8,7 @@
         tools:context=".TransmitterActivity">
 
     <TextView
-            android:text="IP"
+            android:text="@string/ip"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:id="@+id/ShowIPTextView" android:textSize="25sp"
@@ -22,23 +22,23 @@
             app:layout_constraintTop_toTopOf="parent" app:layout_constraintStart_toStartOf="parent"
             android:layout_marginTop="330dp" app:layout_constraintEnd_toEndOf="parent">
         <Button
-                android:text="Change"
+                android:text="@string/change"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content" android:id="@+id/ChangeSongButton" android:layout_weight="1"
                 android:onClick="changeSong"/>
         <Button
-                android:text="Stop"
+                android:text="@string/stop"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content" android:id="@+id/StopButton" android:layout_weight="1"
                 android:onClick="stopSong"/>
         <Button
-                android:text="Resume"
+                android:text="@string/resume"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content" android:id="@+id/ResumeButton" android:layout_weight="1"
                 android:onClick="resumeSong"/>
     </LinearLayout>
     <Button
-            android:text="Exit"
+            android:text="@string/exit"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:id="@+id/ExitT"
