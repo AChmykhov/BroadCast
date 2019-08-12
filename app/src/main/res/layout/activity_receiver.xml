@@ -79,7 +79,7 @@
             android:layout_height="wrap_content"
             android:id="@+id/EXITR"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent" android:onClick="exitFromParty"
+            app:layout_constraintEnd_toEndOf="parent" android:onClick="onExit"
     />
     <ImageButton
             android:layout_width="wrap_content"

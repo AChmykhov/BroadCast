@@ -5,6 +5,7 @@ import android.media.MediaPlayer
 import android.net.Uri
 import android.os.Bundle
 import android.view.View
+import android.view.View.Z
 import android.widget.SeekBar
 import android.widget.TextView
 import android.widget.Toast
@@ -29,7 +30,7 @@ class ReceiverActivity : AppCompatActivity() {
         return intent.getStringExtra(IPPort)
     }
 
-    fun bar() {
+    fun bar() {Z
         var delaybar = findViewById<SeekBar>(R.id.DelayBar)
 
         delaybar.setOnSeekBarChangeListener(
@@ -68,16 +69,14 @@ class ReceiverActivity : AppCompatActivity() {
     }
 
     fun onPlay(view: View) {
-        PLAY.setOnClickListener {
-            if (pause) {
-                mediaplayer.start()
-                pause = false
-                PLAY.setImageResource(android.R.drawable.ic_media_pause)
-            } else {
-                mediaplayer.pause()
-                pause = true
-                PLAY.setImageResource(android.R.drawable.ic_media_play)
-            }
+        if (pause) {
+            mediaplayer.start()
+            pause = false
+            PLAY.setImageResource(android.R.drawable.ic_media_pause)
+        } else {
+            mediaplayer.pause()
+            pause = true
+            PLAY.setImageResource(android.R.drawable.ic_media_play)
         }
     }
 
@@ -92,7 +91,7 @@ class ReceiverActivity : AppCompatActivity() {
 
     fun close() {
         mediaplayer.stop()
-        super.finish()
+        finish()
     }
 
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
