@@ -6,28 +6,80 @@ import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.net.wifi.WifiManager
+import android.os.Build
 import android.os.Bundle
 import android.util.Log
 import android.view.View
 import android.widget.TextView
 import android.widget.Toast
+import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import com.nbsp.materialfilepicker.MaterialFilePicker
 import com.nbsp.materialfilepicker.ui.FilePickerActivity
 import kotlinx.android.synthetic.main.activity_transmitter.*
+import java.io.File
+import java.io.IOException
 import java.util.regex.Pattern
-
-
+import fi.iki.elonen.NanoHTTPD
+import kotlinx.android.synthetic.main.activity_main.*
 
 
 class TransmitterActivity : AppCompatActivity() {
 
-    private var path = "asdf"
+    var path: String = ""
+
+    inner class App @Throws(IOException::class) constructor() : NanoHTTPD(63342) {
+
+        init {
+            start(NanoHTTPD.SOCKET_READ_TIMEOUT, false)
+        }
+
+        @RequiresApi(Build.VERSION_CODES.O)
+        override fun serve(session: IHTTPSession): NanoHTTPD.Response {
+
+            return NanoHTTPD.newChunkedResponse(Response.Status.OK, ".mp3", readFileAsTextUsingInputStream(path))
+        }
+
+    }
+
+
+    fun readFileAsTextUsingInputStream(fileName: String)
+            = File(fileName).inputStream()
+
+    private fun getLocalIpAddress(): String? {
+        try {
+
+            val wifiManager: WifiManager = getApplicationContext().getSystemService(Context.WIFI_SERVICE) as WifiManager
+            return ipToString(wifiManager.connectionInfo.ipAddress)
+        }
+        catch (ex: Exception) {
+            Log.e("IP Address", ex.toString())
+        }
+
+        return null
+    }
+
+    private fun ipToString(i: Int): String {
+        return (i and 0xFF).toString() + "." +
+                (i shr 8 and 0xFF) + "." +
+                (i shr 16 and 0xFF) + "." +
+                (i shr 24 and 0xFF)
+
+    }
+
+    fun runServ(view: View) {
+        try {
+            App()
+        } catch (ioe: IOException) {
+            System.err.println("Couldn't start server:\n$ioe")
+        }
+
+    }
 
     fun getData(): String {
-        return "123"
+        return getLocalIpAddress().toString()
     }
 
 
@@ -56,25 +108,7 @@ class TransmitterActivity : AppCompatActivity() {
         }
     }
 
-    private fun ipToString(i: Int): String {
-        return (i and 0xFF).toString() + "." +
-                (i shr 8 and 0xFF) + "." +
-                (i shr 16 and 0xFF) + "." +
-                (i shr 24 and 0xFF)
 
-    }
-    private fun getLocalIpAddress(): String? {
-        try {
-
-            val wifiManager: WifiManager = getApplicationContext().getSystemService(Context.WIFI_SERVICE) as WifiManager
-            return ipToString(wifiManager.connectionInfo.ipAddress)
-        }
-        catch (ex: Exception) {
-            Log.e("IP Address", ex.toString())
-        }
-
-        return null
-    }
 
     fun exitFromParty(view: View) {
         // PUT YOUR CODE HERE
@@ -85,8 +119,14 @@ class TransmitterActivity : AppCompatActivity() {
     }
 
     fun resumeSong(view: View) {
-        // PUT YOUR CODE HERE
-
+        Toast.makeText(this, "YES!", Toast.LENGTH_SHORT).show()
+        try {
+            Toast.makeText(this, "Good!", Toast.LENGTH_LONG).show()
+            runServ(view)}
+        catch (ioe: Exception) {
+            System.err.println("Couldn't start server:\n$ioe")
+            Toast.makeText(this, "$ioe", Toast.LENGTH_LONG).show()
+        }
     }
 
     fun changeSong(view: View) {
