@@ -1,5 +1,6 @@
 package com.example.broadcast
 
+import android.Manifest
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
@@ -13,6 +14,8 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
 import com.android.volley.Request
 import com.android.volley.Response
 import com.android.volley.toolbox.StringRequest
@@ -97,9 +100,17 @@ class MainActivity : AppCompatActivity() {
         val textView1 = findViewById<TextView>(R.id.textView)
         textView1.text = getLocalIpAddress()
 
-        if (Build.VERSION.SDK_INT > Build.VERSION_CODES.M &&
-            checkSelfPermission(android.Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED)
-            requestPermissions(arrayOf(android.Manifest.permission.WRITE_EXTERNAL_STORAGE), 10001)
+
+        val thisActivity = this@MainActivity
+        if (ContextCompat.checkSelfPermission(thisActivity,
+                Manifest.permission.WRITE_EXTERNAL_STORAGE)
+            != PackageManager.PERMISSION_GRANTED) {
+            if (!(ActivityCompat.shouldShowRequestPermissionRationale(thisActivity,
+                    Manifest.permission.WRITE_EXTERNAL_STORAGE))) {
+                ActivityCompat.requestPermissions(thisActivity,
+                    arrayOf(Manifest.permission.WRITE_EXTERNAL_STORAGE), 1)
+            }
+        }
 
 // ...
 
