@@ -3,16 +3,12 @@ package com.example.broadcast
 import android.content.pm.PackageManager
 import android.media.MediaPlayer
 import android.net.Uri
-import android.os.Build
 import android.os.Bundle
-import android.view.View
 import android.widget.SeekBar
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import kotlinx.android.synthetic.main.activity_receiver.*
-import android.content.Intent
-import android.view.MenuItem
 
 class ReceiverActivity : AppCompatActivity() {
 
@@ -43,13 +39,21 @@ class ReceiverActivity : AppCompatActivity() {
         val max = findViewById<TextView>(R.id.MaximumTextView)
         max.setText(middle.toString())
 
-        var mediaplayer = MediaPlayer.create(this, Uri.parse("http://www.hochmuth.com/mp3/Tchaikovsky_Rococo_Var_orch.mp3"));
+        var mediaplayer = MediaPlayer.create(this, Uri.parse("http://d.zaix.ru/dQYH.mp3"))
+        //var mediaplayer = MediaPlayer.create(this, Uri.parse("192.168.212.102:63342"))
 
-        PLAY.setOnClickListener{
-            mediaplayer.start()
-        }
-        PAUSE.setOnClickListener{
-            mediaplayer.pause()
+        var pause = true
+
+        PLAY.setOnClickListener {
+            if (pause) {
+                mediaplayer.start()
+                pause = false
+                PLAY.setImageResource(android.R.drawable.ic_media_pause)
+            } else {
+                mediaplayer.pause()
+                pause = true
+                PLAY.setImageResource(android.R.drawable.ic_media_play)
+            }
         }
         EXITR.setOnClickListener {
             mediaplayer.stop()
