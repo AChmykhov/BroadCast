@@ -119,8 +119,6 @@ class MainActivity : AppCompatActivity() {
         if (requestCode == 1000 && resultCode == Activity.RESULT_OK) {
             val filePath = data!!.getStringExtra(FilePickerActivity.RESULT_FILE_PATH)
             path = filePath
-            // val textView2: ByteArray
-            // textView2 = converter(filePath)
         }
     }
 
