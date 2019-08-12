@@ -19,12 +19,12 @@
             app:layout_constraintBottom_toTopOf="@+id/linearLayout2" app:layout_constraintHorizontal_bias="0.0"
     >
         <TextView
-                android:text="Delay:"
+                android:text="@string/delay"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content" android:id="@+id/textView5" android:layout_weight="1"
                 android:textSize="20sp"/>
         <TextView
-                android:text="0"
+                android:text="@string/_0"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content" android:id="@+id/DelayTextView" android:layout_weight="15"
                 android:textSize="20sp"/>
@@ -41,17 +41,17 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content">
             <TextView
-                    android:text="-100"
+                    android:text="@string/_100"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content" android:id="@+id/MinimumTextView" android:layout_weight="1"
                     android:textSize="20sp"/>
             <TextView
-                    android:text="0"
+                    android:text="@string/_0"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content" android:id="@+id/textView3" android:layout_weight="1"
                     android:textSize="20sp" android:textAlignment="center"/>
             <TextView
-                    android:text="100"
+                    android:text="@string/_100"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content" android:id="@+id/MaximumTextView" android:layout_weight="1"
                     android:textSize="20sp" android:textAlignment="textEnd"/>
@@ -67,19 +67,20 @@
                 android:progressBackgroundTint="@color/colorBar"/>
     </LinearLayout>
     <TextView
-            android:text="IP:Port"
+            android:text="@string/ip_port"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:id="@+id/IPPortReceiverTextView" android:textSize="25sp"
             app:layout_constraintTop_toTopOf="parent" app:layout_constraintStart_toStartOf="parent"
             android:layout_marginTop="181dp" android:layout_marginStart="16dp"/>
     <Button
-            android:text="Exit"
+            android:text="@string/exit"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:id="@+id/EXITR"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent" android:onClick="exitFromParty"/>
+            app:layout_constraintEnd_toEndOf="parent" android:onClick="exitFromParty"
+    />
     <ImageButton
             android:layout_width="wrap_content"
             android:layout_height="wrap_content" app:srcCompat="@android:drawable/ic_media_play"
@@ -88,6 +89,7 @@
             app:layout_constraintBottom_toBottomOf="parent" android:layout_marginBottom="8dp"
             app:layout_constraintStart_toStartOf="parent" android:layout_marginStart="176dp"
             app:layout_constraintVertical_bias="0.434" android:layout_marginEnd="8dp"
-            app:layout_constraintEnd_toEndOf="parent" app:layout_constraintHorizontal_bias="0.005"/>
+            app:layout_constraintEnd_toEndOf="parent" app:layout_constraintHorizontal_bias="0.005"
+            android:onClick="onPlay" android:contentDescription="@string/todo"/>
 
 </androidx.constraintlayout.widget.ConstraintLayout>
