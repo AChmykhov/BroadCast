@@ -16,16 +16,11 @@ import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
-import com.android.volley.Request
-import com.android.volley.Response
-import com.android.volley.toolbox.StringRequest
-import com.android.volley.toolbox.Volley
 import com.nbsp.materialfilepicker.MaterialFilePicker
 import com.nbsp.materialfilepicker.ui.FilePickerActivity
 import fi.iki.elonen.NanoHTTPD
+import java.io.File
 import java.io.IOException
-import java.nio.file.Files
-import java.nio.file.Paths
 import java.util.regex.Pattern
 
 
@@ -44,18 +39,14 @@ class MainActivity : AppCompatActivity() {
         @RequiresApi(Build.VERSION_CODES.O)
         override fun serve(session: IHTTPSession): NanoHTTPD.Response {
 
-            return NanoHTTPD.newChunkedResponse(Response.Status.OK, ".mp3", converter(path).inputStream())
+            return NanoHTTPD.newChunkedResponse(Response.Status.OK, ".mp3", readFileAsTextUsingInputStream(path))
         }
 
     }
 
 
-    @RequiresApi(Build.VERSION_CODES.O)
-    fun converter(path: String): ByteArray {
-        val text = findViewById<TextView>(R.id.text)
-        text.text = path
-        return Files.readAllBytes(Paths.get(path))
-    }
+    fun readFileAsTextUsingInputStream(fileName: String)
+            = File(fileName).inputStream()
 
     private fun getLocalIpAddress(): String? {
         try {
@@ -108,25 +99,8 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
-// ...
-
-// Instantiate the RequestQueue.
-        val queue = Volley.newRequestQueue(this)
-        val url = "http://www.google.com"
-// Request a string response from the provided URL.
-        val stringRequest = StringRequest(Request.Method.GET, url,
-            Response.Listener<String> {},
-            Response.ErrorListener { textView.text = "That didn't work!" })
-
-// Add the request to the RequestQueue.
-        queue.run {
-
-            // Add the request to the RequestQueue.
-            add(stringRequest)
-        }
 
     }
-
 
     fun changeSong(view: View) {
         MaterialFilePicker()
@@ -145,8 +119,8 @@ class MainActivity : AppCompatActivity() {
         if (requestCode == 1000 && resultCode == Activity.RESULT_OK) {
             val filePath = data!!.getStringExtra(FilePickerActivity.RESULT_FILE_PATH)
             path = filePath
-            val textView2: ByteArray
-            textView2 = converter(filePath)
+            // val textView2: ByteArray
+            // textView2 = converter(filePath)
         }
     }
 
