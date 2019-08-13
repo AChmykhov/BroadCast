@@ -3,7 +3,10 @@ package com.example.broadcast
 import android.content.pm.PackageManager
 import android.media.MediaPlayer
 import android.net.Uri
+import android.os.AsyncTask
 import android.os.Bundle
+import android.os.Environment
+import android.util.Log
 import android.view.View
 import android.view.View.Z
 import android.widget.SeekBar
@@ -11,10 +14,14 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import kotlinx.android.synthetic.main.activity_receiver.*
+import java.io.BufferedInputStream
+import java.io.FileOutputStream
+import java.net.URL
+
 
 class ReceiverActivity : AppCompatActivity() {
 
-    private var mediaplayer = MediaPlayer()
+    public var mediaplayer = MediaPlayer()
     private var pause = true
 
     companion object {
@@ -30,7 +37,8 @@ class ReceiverActivity : AppCompatActivity() {
         return intent.getStringExtra(IPPort).toString()
     }
 
-    fun bar() {Z
+    fun bar() {
+        Z
         var delaybar = findViewById<SeekBar>(R.id.DelayBar)
 
         delaybar.setOnSeekBarChangeListener(
@@ -39,7 +47,7 @@ class ReceiverActivity : AppCompatActivity() {
                     var delaytext = findViewById<TextView>(R.id.DelayTextView)
                     val delay: Int = progress - delaybar.max / 2
                     delaytext.setText(delay.toString())
-                    mediaplayer.seekTo(mediaplayer.currentPosition+getDelay())
+                    mediaplayer.seekTo(mediaplayer.currentPosition + getDelay())
                 }
 
                 override fun onStartTrackingTouch(seekBar: SeekBar) {}
@@ -56,9 +64,8 @@ class ReceiverActivity : AppCompatActivity() {
         val textview = findViewById<TextView>(R.id.IPPortReceiverTextView)
         textview.setText(getData())
 
-        //mediaplayer = MediaPlayer.create(this, Uri.parse("http://d.zaix.ru/dQYH.mp3"))
         try {
-            mediaplayer = MediaPlayer.create(this, Uri.parse(getData()))
+            DownloadFileFromURL().execute("http://" + getData() + "/song.mp3")
         } catch (ioe: Exception) {
             mediaplayer = MediaPlayer.create(this, Uri.parse("http://d.zaix.ru/dQYH.mp3"))
 
@@ -112,4 +119,53 @@ class ReceiverActivity : AppCompatActivity() {
             }
         }
     }
+
+
+    internal inner class DownloadFileFromURL : AsyncTask<String, String, String?>() {
+
+        override fun onPreExecute() {}
+
+        override fun doInBackground(vararg f_url: String): String? {
+            val count: Int
+            try {
+                val url = URL(f_url[0])
+                val conection = url.openConnection()
+                conection.connect()
+
+                val lenghtOfFile = conection.contentLength
+                val input = BufferedInputStream(url.openStream(), 8192)
+                val output = FileOutputStream(
+                    Environment.getExternalStorageDirectory().toString() + "/Music/song.mp3"
+                )
+
+                val data = ByteArray(1024)
+                var total: Long = 0
+                var count = input.read(data)
+                while (count != -1) {
+                    total += count.toLong()
+                    output.write(data, 0, count)
+                    count = input.read(data)
+                }
+
+                output.flush()
+                output.close()
+                input.close()
+
+            } catch (e: Exception) {
+                Log.e("Error: ", "$e")
+            }
+
+            return null
+        }
+
+        override fun onProgressUpdate(vararg progress: String) {}
+
+        override fun onPostExecute(fileUri: String?) {
+            val root = Environment.getExternalStorageDirectory().toString()
+            var thisActivity = this@ReceiverActivity
+            mediaplayer = MediaPlayer.create(thisActivity, Uri.parse(root + "/Music/song.mp3"))
+        }
+
+    }
+
 }
