@@ -8,7 +8,6 @@ import android.os.Bundle
 import android.os.Environment
 import android.util.Log
 import android.view.View
-import android.view.View.Z
 import android.widget.SeekBar
 import android.widget.TextView
 import android.widget.Toast
@@ -38,7 +37,6 @@ class ReceiverActivity : AppCompatActivity() {
     }
 
     fun bar() {
-        Z
         var delaybar = findViewById<SeekBar>(R.id.DelayBar)
 
         delaybar.setOnSeekBarChangeListener(
