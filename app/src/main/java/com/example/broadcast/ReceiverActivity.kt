@@ -21,7 +21,7 @@ import java.net.URL
 
 class ReceiverActivity : AppCompatActivity() {
 
-    public var mediaplayer = MediaPlayer()
+    var mediaplayer = MediaPlayer()
     private var pause = true
 
     companion object {

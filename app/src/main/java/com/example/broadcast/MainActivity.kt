@@ -16,18 +16,18 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
     }
 
-    fun StartParty(view: View) {
+    fun StartParty(@Suppress("UNUSED_PARAMETER")view: View) {
         startActivity(Intent(this, TransmitterActivity::class.java))
     }
 
-    fun joinParty(view: View) {
+    fun joinParty(@Suppress("UNUSED_PARAMETER")view: View) {
         val data = findViewById<TextInputEditText>(R.id.IPPoirtInput)
         val wifiManager = applicationContext.getSystemService(Context.WIFI_SERVICE) as WifiManager
         if (data.text.toString() == "") {
             Toast.makeText(this, "No IP address entered", Toast.LENGTH_LONG).show()
         } else {
             if (!(wifiManager.isWifiEnabled)) {
-                Toast.makeText(this, "No Wi-Fi network connection", Toast.LENGTH_LONG).show()
+                Toast.makeText(this, "No connection to Wi-Fi network", Toast.LENGTH_LONG).show()
             } else {
                 val receiverIntent = Intent(this, ReceiverActivity::class.java)
                 receiverIntent.putExtra(ReceiverActivity.ipPort, data.text.toString())

@@ -33,13 +33,13 @@ class TransmitterActivity : AppCompatActivity() {
     inner class App @Throws(IOException::class) constructor() : NanoHTTPD(63342) {
 
         init {
-            start(NanoHTTPD.SOCKET_READ_TIMEOUT, false)
+            start(SOCKET_READ_TIMEOUT, false)
         }
 
         @RequiresApi(Build.VERSION_CODES.O)
-        override fun serve(session: IHTTPSession): NanoHTTPD.Response {
+        override fun serve(session: IHTTPSession): Response {
 
-            return NanoHTTPD.newChunkedResponse(Response.Status.OK, ".mp3", readFileAsTextUsingInputStream(path))
+            return newChunkedResponse(Response.Status.OK, ".mp3", readFileAsTextUsingInputStream(path))
         }
 
     }
