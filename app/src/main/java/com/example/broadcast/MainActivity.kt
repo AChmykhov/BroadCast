@@ -1,8 +1,11 @@
 package com.example.broadcast
 
+import android.content.Context
 import android.content.Intent
+import android.net.wifi.WifiManager
 import android.os.Bundle
 import android.view.View
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.google.android.material.textfield.TextInputEditText
 
@@ -17,10 +20,19 @@ class MainActivity : AppCompatActivity() {
         startActivity(Intent(this, TransmitterActivity::class.java))
     }
 
-    fun JoinParty(view: View) {
-        var ReceiverIntent = Intent(this, ReceiverActivity::class.java)
-        val data = findViewById(R.id.IPPoirtInput) as TextInputEditText
-        ReceiverIntent.putExtra(ReceiverActivity.IPPort, data.text.toString())
-        startActivity(ReceiverIntent)
+    fun joinParty(view: View) {
+        val data = findViewById<TextInputEditText>(R.id.IPPoirtInput)
+        val wifiManager = applicationContext.getSystemService(Context.WIFI_SERVICE) as WifiManager
+        if (data.text.toString() == "") {
+            Toast.makeText(this, "No IP address entered", Toast.LENGTH_LONG).show()
+        } else {
+            if (!(wifiManager.isWifiEnabled)) {
+                Toast.makeText(this, "No Wi-Fi network connection", Toast.LENGTH_LONG).show()
+            } else {
+                val receiverIntent = Intent(this, ReceiverActivity::class.java)
+                receiverIntent.putExtra(ReceiverActivity.ipPort, data.text.toString())
+                startActivity(receiverIntent)
+            }
+        }
     }
 }

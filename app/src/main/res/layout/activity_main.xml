@@ -46,7 +46,7 @@
                 android:id="@+id/JoinButton"
                 android:layout_weight="1"
                 android:textSize="20sp"
-                android:onClick="JoinParty"/>
+                android:onClick="joinParty"/>
     </LinearLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

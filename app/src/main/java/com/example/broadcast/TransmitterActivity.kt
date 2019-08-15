@@ -45,20 +45,15 @@ class TransmitterActivity : AppCompatActivity() {
     }
 
 
-    fun readFileAsTextUsingInputStream(fileName: String)
-            = File(fileName).inputStream()
+    fun readFileAsTextUsingInputStream(fileName: String) = File(fileName).inputStream()
 
-    private fun getLocalIpAddress(): String? {
-        try {
-
-            val wifiManager: WifiManager = getApplicationContext().getSystemService(Context.WIFI_SERVICE) as WifiManager
-            return ipToString(wifiManager.connectionInfo.ipAddress)
+    private fun getLocalIpAddress(): String {
+        val wifiManager = applicationContext.getSystemService(Context.WIFI_SERVICE) as WifiManager
+        if (wifiManager.connectionInfo.ipAddress == 0) {
+            Toast.makeText(this, "No connection to Wi-Fi network", Toast.LENGTH_LONG).show()
+            finish()
         }
-        catch (ex: Exception) {
-            Log.e("IP Address", ex.toString())
-        }
-
-        return null
+        return ipToString(wifiManager.connectionInfo.ipAddress)
     }
 
     private fun ipToString(i: Int): String {
@@ -69,52 +64,54 @@ class TransmitterActivity : AppCompatActivity() {
 
     }
 
-    fun runServ(view: View) {
+    fun runServ(@Suppress("UNUSED_PARAMETER") view: View) {
         try {
             App()
         } catch (ioe: IOException) {
             System.err.println("Couldn't start server:\n$ioe")
+            Toast.makeText(this, "Couldn't start server:\n$ioe", Toast.LENGTH_LONG).show()
+            finish()
         }
 
-    }
-
-    fun getData(): String {
-        return getLocalIpAddress().toString()
     }
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_transmitter)
-        findViewById<TextView>(R.id.ShowIPTextView).setText(getData())
+        findViewById<TextView>(R.id.ShowIPTextView).text = getLocalIpAddress()
 
         val thisActivity = this@TransmitterActivity
 
-        if (ContextCompat.checkSelfPermission(thisActivity,
-                Manifest.permission.WRITE_EXTERNAL_STORAGE)
-            != PackageManager.PERMISSION_GRANTED) {
+        if (ContextCompat.checkSelfPermission(
+                thisActivity,
+                Manifest.permission.WRITE_EXTERNAL_STORAGE
+            )
+            != PackageManager.PERMISSION_GRANTED
+        ) {
 
-            if (!(ActivityCompat.shouldShowRequestPermissionRationale(thisActivity,
-                    Manifest.permission.WRITE_EXTERNAL_STORAGE))) {
-                ActivityCompat.requestPermissions(thisActivity,
-                    arrayOf(Manifest.permission.WRITE_EXTERNAL_STORAGE), 1)
+            if (!(ActivityCompat.shouldShowRequestPermissionRationale(
+                    thisActivity,
+                    Manifest.permission.WRITE_EXTERNAL_STORAGE
+                ))
+            ) {
+                ActivityCompat.requestPermissions(
+                    thisActivity,
+                    arrayOf(Manifest.permission.WRITE_EXTERNAL_STORAGE), 1
+                )
             }
         }
 
         val showIP = findViewById<TextView>(R.id.ShowIPTextView)
         showIP.text = getLocalIpAddress()
-        ExitT.setOnClickListener {
-            finish()
-        }
     }
 
 
-
-    fun exitFromParty(view: View) {
-        // PUT YOUR CODE HERE
+    fun exitFromParty(@Suppress("UNUSED_PARAMETER") view: View) {
+        finish()
     }
 
-    fun stopSong(view: View) {
+    fun stopSong(@Suppress("UNUSED_PARAMETER") view: View) {
         // PUT YOUR CODE HERE
     }
 
@@ -122,14 +119,14 @@ class TransmitterActivity : AppCompatActivity() {
         Toast.makeText(this, "YES!", Toast.LENGTH_SHORT).show()
         try {
             Toast.makeText(this, "Good!", Toast.LENGTH_LONG).show()
-            runServ(view)}
-        catch (ioe: Exception) {
+            runServ(view)
+        } catch (ioe: Exception) {
             System.err.println("Couldn't start server:\n$ioe")
             Toast.makeText(this, "$ioe", Toast.LENGTH_LONG).show()
         }
     }
 
-    fun changeSong(view: View) {
+    fun changeSong(@Suppress("UNUSED_PARAMETER") view: View) {
         MaterialFilePicker()
             .withActivity(this)
             .withRequestCode(1000)
@@ -140,11 +137,16 @@ class TransmitterActivity : AppCompatActivity() {
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        super.onActivityResult(requestCode, resultCode, data)
+        val resultPath = data?.getStringExtra(FilePickerActivity.RESULT_FILE_PATH)
+        if (resultPath == null) {
+            Toast.makeText(this, "Problem with file path parsing", Toast.LENGTH_LONG).show()
+        } else {
+            super.onActivityResult(requestCode, resultCode, data)
 
-        if (requestCode == 1000 && resultCode == Activity.RESULT_OK) {
-            val filePath = data!!.getStringExtra(FilePickerActivity.RESULT_FILE_PATH)
-            path = filePath
+
+            if (requestCode == 1000 && resultCode == Activity.RESULT_OK) {
+                path = resultPath
+            }
         }
     }
 

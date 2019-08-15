@@ -25,7 +25,7 @@ class ReceiverActivity : AppCompatActivity() {
     private var pause = true
 
     companion object {
-        const val IPPort = "IP:Port_of_connection"
+        const val ipPort = "IP:Port_of_connection"
     }
 
     fun getDelay(): Int {
@@ -34,17 +34,21 @@ class ReceiverActivity : AppCompatActivity() {
     }
 
     fun getData(): String {
-        return intent.getStringExtra(IPPort).toString()
+        val ipPort: String? = intent.getStringExtra(ipPort)
+        if (ipPort == null) {
+            Toast.makeText(this, "Invalid IP address entered\n No server on this IP", Toast.LENGTH_LONG).show()
+            finish()
+        }
+        return ipPort.toString()
     }
 
     fun bar() {
-        Z
-        var delaybar = findViewById<SeekBar>(R.id.DelayBar)
+        val delaybar = findViewById<SeekBar>(R.id.DelayBar)
 
         delaybar.setOnSeekBarChangeListener(
             object : SeekBar.OnSeekBarChangeListener {
                 override fun onProgressChanged(seekBar: SeekBar, progress: Int, b: Boolean) {
-                    var delaytext = findViewById<TextView>(R.id.DelayTextView)
+                    val delaytext = findViewById<TextView>(R.id.DelayTextView)
                     val delay: Int = progress - delaybar.max / 2
                     delaytext.setText(delay.toString())
                     mediaplayer.seekTo(mediaplayer.currentPosition + getDelay())
@@ -64,12 +68,12 @@ class ReceiverActivity : AppCompatActivity() {
         val textview = findViewById<TextView>(R.id.IPPortReceiverTextView)
         textview.setText(getData())
 
+        val urlStr = "http://" + getData() + ":63342/song.mp3"
         try {
-            DownloadFileFromURL().execute("http://" + getData() + "/song.mp3")
+            DownloadFileFromURL().execute(urlStr)
         } catch (ioe: Exception) {
-            mediaplayer = MediaPlayer.create(this, Uri.parse("http://d.zaix.ru/dQYH.mp3"))
-
-            Toast.makeText(this, "$ioe", Toast.LENGTH_LONG).show()
+            Toast.makeText(this, "Problem with downloading song \n Exception: $ioe", Toast.LENGTH_LONG).show()
+            finish()
         }
         val middle: Int = findViewById<SeekBar>(R.id.DelayBar).max / 2
         findViewById<SeekBar>(R.id.DelayBar).progress = middle
@@ -81,7 +85,7 @@ class ReceiverActivity : AppCompatActivity() {
         bar()
     }
 
-    fun onPlay(view: View) {
+    fun onPlay(@Suppress("UNUSED_PARAMETER") view: View) {
         if (pause) {
             mediaplayer.start()
             pause = false
@@ -93,7 +97,7 @@ class ReceiverActivity : AppCompatActivity() {
         }
     }
 
-    fun onExit(view: View) {
+    fun onExit(@Suppress("UNUSED_PARAMETER") view: View) {
         close()
     }
 
@@ -126,16 +130,14 @@ class ReceiverActivity : AppCompatActivity() {
         override fun onPreExecute() {}
 
         override fun doInBackground(vararg f_url: String): String? {
-            val count: Int
             try {
                 val url = URL(f_url[0])
                 val conection = url.openConnection()
                 conection.connect()
 
-                val lenghtOfFile = conection.contentLength
                 val input = BufferedInputStream(url.openStream(), 8192)
                 val output = FileOutputStream(
-                    Environment.getExternalStorageDirectory().toString() + "/Music/song.mp3"
+                    Environment.getRootDirectory().toString() + "/Music/song.mp3"
                 )
 
                 val data = ByteArray(1024)
@@ -161,9 +163,9 @@ class ReceiverActivity : AppCompatActivity() {
         override fun onProgressUpdate(vararg progress: String) {}
 
         override fun onPostExecute(fileUri: String?) {
-            val root = Environment.getExternalStorageDirectory().toString()
-            var thisActivity = this@ReceiverActivity
-            mediaplayer = MediaPlayer.create(thisActivity, Uri.parse(root + "/Music/song.mp3"))
+            val root = Environment.getRootDirectory().toString()
+            val thisActivity = this@ReceiverActivity
+            mediaplayer = MediaPlayer.create(thisActivity, Uri.parse("$root/Music/song.mp3"))
         }
 
     }
