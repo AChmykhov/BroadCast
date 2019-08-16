@@ -5,4 +5,10 @@
     <color name="colorAccent">#D81B60</color>
     <color name="colorReceiverBackground">#ffffff</color>
     <color name="colorBar">#ffeeff</color>
+    <color name="Background">#ce93d8</color>
+    <color name="BackgroundLight">#fff7ff</color>
+    <color name="BackgroundDark">#a094b7</color>
+    <color name="Text">#bb4d00</color>
+    <color name="TextLight">#ffad42</color>
+    <color name="TextDark">#000000</color>
 </resources>
