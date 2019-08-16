@@ -1,5 +1,6 @@
 package com.example.broadcast
 
+import android.content.Intent
 import android.content.pm.PackageManager
 import android.media.MediaPlayer
 import android.net.Uri
@@ -26,6 +27,10 @@ class ReceiverActivity : AppCompatActivity() {
 
     companion object {
         const val IPPort = "IP:Port_of_connection"
+    }
+
+    fun Sync(view: View) {
+        startActivity(Intent(this, SyncActivity::class.java))
     }
 
     fun getDelay(): Int {
