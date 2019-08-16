@@ -33,6 +33,7 @@ class TransmitterActivity : AppCompatActivity() {
     var path: String = ""
     var ipList = mutableListOf<String>()
     private val latency = 200
+    lateinit var server: SongServer
 
     inner class SongServer @Throws(IOException::class) constructor() : NanoHTTPD(63342) {
 
@@ -52,6 +53,10 @@ class TransmitterActivity : AppCompatActivity() {
             return newChunkedResponse(Response.Status.OK, ".mp3", File(path).inputStream())
         }
 
+    }
+
+    fun close() {
+        finish()
     }
 
     private fun getLocalIpAddress(): String? {
@@ -77,7 +82,7 @@ class TransmitterActivity : AppCompatActivity() {
 
     fun runSongServer() {
         try {
-            SongServer()
+            server = SongServer()
         } catch (ioe: IOException) {
             System.err.println("Couldn't start server:\n$ioe")
         }

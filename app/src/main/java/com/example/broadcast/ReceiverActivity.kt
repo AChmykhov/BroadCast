@@ -29,7 +29,7 @@ class ReceiverActivity : AppCompatActivity() {
     private var mediaplayer = MediaPlayer()
     private var pause = true
 
-    inner class recieverServer @Throws(IOException::class) constructor() : NanoHTTPD(63343) {
+    inner class receiverServer @Throws(IOException::class) constructor() : NanoHTTPD(63343) {
 
         init {
             start(SOCKET_READ_TIMEOUT, false)
@@ -38,8 +38,10 @@ class ReceiverActivity : AppCompatActivity() {
         override fun serve(session: IHTTPSession): Response {
             val params = session.parameters
             runOnUiThread {Toast.makeText(this@ReceiverActivity, "Resume signal received", Toast.LENGTH_SHORT).show()}
-            if (params.containsKey("startToPlay")) {
-                params["startToPlay"]?.get(0)?.let { startPlaying(it) }
+            runOnUiThread {Toast.makeText(this@ReceiverActivity, params.toString(), Toast.LENGTH_SHORT).show()}
+            if (params.containsKey("timeToStart")) {
+                runOnUiThread {Toast.makeText(this@ReceiverActivity, params["timeToStart"].toString(), Toast.LENGTH_SHORT).show()}
+                params["timeToStart"]?.get(0)?.let { startPlaying(it) }
                 runOnUiThread {Toast.makeText(this@ReceiverActivity, "Parameter in ", Toast.LENGTH_SHORT).show()}
             }
             return newFixedLengthResponse("Hello World!")
@@ -68,7 +70,7 @@ class ReceiverActivity : AppCompatActivity() {
     }
 
     fun runServer() {
-            recieverServer()
+        receiverServer()
     }
 
     fun bar() {
