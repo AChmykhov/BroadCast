@@ -6,29 +6,31 @@ import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.net.wifi.WifiManager
-import android.os.Build
 import android.os.Bundle
+import android.provider.MediaStore
 import android.util.Log
 import android.view.View
+import android.widget.ArrayAdapter
+import android.widget.ListView
 import android.widget.TextView
 import android.widget.Toast
-import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import com.nbsp.materialfilepicker.MaterialFilePicker
 import com.nbsp.materialfilepicker.ui.FilePickerActivity
+import fi.iki.elonen.NanoHTTPD
 import kotlinx.android.synthetic.main.activity_transmitter.*
 import java.io.File
 import java.io.IOException
 import java.util.regex.Pattern
-import fi.iki.elonen.NanoHTTPD
-import kotlinx.android.synthetic.main.activity_main.*
 
 
 class TransmitterActivity : AppCompatActivity() {
 
     var path: String = ""
+    var musicArray = emptyArray<String>()
+    var locationArray = emptyArray<String>()
 
     inner class App @Throws(IOException::class) constructor() : NanoHTTPD(63342) {
 
@@ -36,7 +38,6 @@ class TransmitterActivity : AppCompatActivity() {
             start(NanoHTTPD.SOCKET_READ_TIMEOUT, false)
         }
 
-        @RequiresApi(Build.VERSION_CODES.O)
         override fun serve(session: IHTTPSession): NanoHTTPD.Response {
 
             return NanoHTTPD.newChunkedResponse(Response.Status.OK, ".mp3", readFileAsTextUsingInputStream(path))
@@ -45,16 +46,14 @@ class TransmitterActivity : AppCompatActivity() {
     }
 
 
-    fun readFileAsTextUsingInputStream(fileName: String)
-            = File(fileName).inputStream()
+    fun readFileAsTextUsingInputStream(fileName: String) = File(fileName).inputStream()
 
     private fun getLocalIpAddress(): String? {
         try {
 
             val wifiManager: WifiManager = getApplicationContext().getSystemService(Context.WIFI_SERVICE) as WifiManager
             return ipToString(wifiManager.connectionInfo.ipAddress)
-        }
-        catch (ex: Exception) {
+        } catch (ex: Exception) {
             Log.e("IP Address", ex.toString())
         }
 
@@ -90,16 +89,26 @@ class TransmitterActivity : AppCompatActivity() {
 
         val thisActivity = this@TransmitterActivity
 
-        if (ContextCompat.checkSelfPermission(thisActivity,
-                Manifest.permission.WRITE_EXTERNAL_STORAGE)
-            != PackageManager.PERMISSION_GRANTED) {
+        if (ContextCompat.checkSelfPermission(
+                thisActivity,
+                Manifest.permission.WRITE_EXTERNAL_STORAGE
+            )
+            != PackageManager.PERMISSION_GRANTED
+        ) {
 
-            if (!(ActivityCompat.shouldShowRequestPermissionRationale(thisActivity,
-                    Manifest.permission.WRITE_EXTERNAL_STORAGE))) {
-                ActivityCompat.requestPermissions(thisActivity,
-                    arrayOf(Manifest.permission.WRITE_EXTERNAL_STORAGE), 1)
+            if (!(ActivityCompat.shouldShowRequestPermissionRationale(
+                    thisActivity,
+                    Manifest.permission.WRITE_EXTERNAL_STORAGE
+                ))
+            ) {
+                ActivityCompat.requestPermissions(
+                    thisActivity,
+                    arrayOf(Manifest.permission.WRITE_EXTERNAL_STORAGE), 1
+                )
             }
         }
+
+        createMusicList()
 
         val showIP = findViewById<TextView>(R.id.ShowIPTextView)
         showIP.text = getLocalIpAddress()
@@ -108,7 +117,45 @@ class TransmitterActivity : AppCompatActivity() {
         }
     }
 
+    fun createMusicList() {
+        var musicList = findViewById<ListView>(R.id.MusicList)
+        getMusic()
+        var adapter = ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, musicArray)
+        musicList.adapter = adapter
 
+        musicList.setOnItemClickListener { parent, view, position, id ->
+            path = locationArray[position]
+            Toast.makeText(this, "YES!", Toast.LENGTH_SHORT).show()
+            try {
+                Toast.makeText(this, "Good!", Toast.LENGTH_LONG).show()
+                runServ(view)
+            } catch (ioe: Exception) {
+                System.err.println("Couldn't start server:\n$ioe")
+                Toast.makeText(this, "$ioe", Toast.LENGTH_LONG).show()
+            }
+        }
+    }
+
+    fun getMusic() {
+        var contecntResolver = getContentResolver()
+        var songUri = MediaStore.Audio.Media.EXTERNAL_CONTENT_URI
+        var songCursor = contentResolver.query(songUri, null, null, null, null)
+
+        if (songCursor != null && songCursor.moveToFirst()) {
+            var songTitle = songCursor.getColumnIndex(MediaStore.Audio.Media.TITLE)
+            var songArtist = songCursor.getColumnIndex(MediaStore.Audio.Media.ARTIST)
+            var songLocation = songCursor.getColumnIndex(MediaStore.Audio.Media.DATA)
+
+            do {
+                val currentTitle = songCursor.getString(songTitle)
+                val currentArtist = songCursor.getString(songArtist)
+                val currentLocation = songCursor.getString(songLocation)
+                musicArray += "Title: " + currentTitle + "\n\n" +
+                        "Artist: " + currentArtist
+                locationArray += currentLocation
+            } while (songCursor.moveToNext())
+        }
+    }
 
     fun exitFromParty(view: View) {
         // PUT YOUR CODE HERE
@@ -122,8 +169,8 @@ class TransmitterActivity : AppCompatActivity() {
         Toast.makeText(this, "YES!", Toast.LENGTH_SHORT).show()
         try {
             Toast.makeText(this, "Good!", Toast.LENGTH_LONG).show()
-            runServ(view)}
-        catch (ioe: Exception) {
+            runServ(view)
+        } catch (ioe: Exception) {
             System.err.println("Couldn't start server:\n$ioe")
             Toast.makeText(this, "$ioe", Toast.LENGTH_LONG).show()
         }
