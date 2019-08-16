@@ -26,8 +26,8 @@ class ReceiverActivity : AppCompatActivity() {
         return Integer.parseInt(delay.text.toString())
     }
 
-    fun getData(): String {
-        return intent.getStringExtra(IPPort).toString()
+    fun getData(): String? {
+        return intent.getStringExtra(IPPort)
     }
 
     fun bar() {Z
@@ -56,14 +56,8 @@ class ReceiverActivity : AppCompatActivity() {
         val textview = findViewById<TextView>(R.id.IPPortReceiverTextView)
         textview.setText(getData())
 
-        //mediaplayer = MediaPlayer.create(this, Uri.parse("http://d.zaix.ru/dQYH.mp3"))
-        try {
-            mediaplayer = MediaPlayer.create(this, Uri.parse(getData()))
-        } catch (ioe: Exception) {
-            mediaplayer = MediaPlayer.create(this, Uri.parse("http://d.zaix.ru/dQYH.mp3"))
+        mediaplayer = MediaPlayer.create(this, Uri.parse("http://d.zaix.ru/dQYH.mp3"))
 
-            Toast.makeText(this, "$ioe", Toast.LENGTH_LONG).show()
-        }
         val middle: Int = findViewById<SeekBar>(R.id.DelayBar).max / 2
         findViewById<SeekBar>(R.id.DelayBar).progress = middle
         val min = findViewById<TextView>(R.id.MinimumTextView)

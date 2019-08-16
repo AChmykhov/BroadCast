@@ -6,11 +6,13 @@ import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.net.wifi.WifiManager
+import android.os.Build
 import android.os.Bundle
 import android.util.Log
 import android.view.View
 import android.widget.TextView
 import android.widget.Toast
+import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
@@ -21,6 +23,8 @@ import kotlinx.android.synthetic.main.activity_transmitter.*
 import java.io.File
 import java.io.IOException
 import java.util.regex.Pattern
+import fi.iki.elonen.NanoHTTPD
+import kotlinx.android.synthetic.main.activity_main.*
 
 
 class TransmitterActivity : AppCompatActivity() {
