@@ -91,5 +91,14 @@
             app:layout_constraintVertical_bias="0.434" android:layout_marginEnd="8dp"
             app:layout_constraintEnd_toEndOf="parent" app:layout_constraintHorizontal_bias="0.005"
             android:onClick="onPlay" android:contentDescription="@string/todo"/>
+    <ImageButton
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" app:srcCompat="@android:drawable/ic_popup_sync"
+            android:onClick="Sync"
+            android:id="@+id/syncButton"
+            app:layout_constraintBottom_toTopOf="@+id/linearLayout3" app:layout_constraintTop_toTopOf="parent"
+            android:layout_marginTop="8dp" app:layout_constraintEnd_toEndOf="parent"
+            android:layout_marginEnd="8dp" app:layout_constraintStart_toEndOf="@+id/IPPortReceiverTextView"
+            android:layout_marginStart="8dp" android:layout_marginBottom="8dp"/>
 
 </androidx.constraintlayout.widget.ConstraintLayout>
