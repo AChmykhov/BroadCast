@@ -17,7 +17,12 @@ class MainActivity : AppCompatActivity() {
     }
 
     fun StartParty(@Suppress("UNUSED_PARAMETER")view: View) {
+        val wifiManager = applicationContext.getSystemService(Context.WIFI_SERVICE) as WifiManager
+        if (!(wifiManager.isWifiEnabled)) {
+            Toast.makeText(this, "No connection to Wi-Fi network", Toast.LENGTH_LONG).show()
+        } else {
         startActivity(Intent(this, TransmitterActivity::class.java))
+        }
     }
 
     fun joinParty(@Suppress("UNUSED_PARAMETER")view: View) {
