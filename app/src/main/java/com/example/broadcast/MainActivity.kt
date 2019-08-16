@@ -26,7 +26,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     fun joinParty(@Suppress("UNUSED_PARAMETER")view: View) {
-        val data = findViewById<TextInputEditText>(R.id.IPPoirtInput)
+        val data = findViewById<TextInputEditText>(R.id.IPPortInput)
         val wifiManager = applicationContext.getSystemService(Context.WIFI_SERVICE) as WifiManager
         if (data.text.toString() == "") {
             Toast.makeText(this, "No IP address entered", Toast.LENGTH_LONG).show()

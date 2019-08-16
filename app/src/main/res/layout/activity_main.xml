@@ -38,7 +38,7 @@
                 android:layout_width="224dp"
                 android:layout_height="wrap_content"
                 android:hint="@string/ip_port" android:textSize="20sp" android:inputType="textUri"
-                android:id="@+id/IPPoirtInput"/>
+                android:id="@+id/IPPortInput"/>
         <Button
                 android:text="@string/join_party"
                 android:layout_width="0dp"
