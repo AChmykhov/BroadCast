@@ -23,7 +23,7 @@ import java.io.IOException
 class TransmitterActivity : AppCompatActivity() {
 
     var path: String = ""
-    var adapter = MusicListAdapter(this)
+    lateinit var adapter: MusicListAdapter
 
     inner class App @Throws(IOException::class) constructor() : NanoHTTPD(63342) {
 
@@ -113,6 +113,7 @@ class TransmitterActivity : AppCompatActivity() {
 
     fun createMusicList() {
         var musicList = findViewById<ListView>(R.id.MusicList)
+        adapter = MusicListAdapter(this, this::runServ)
         getMusic()
         musicList.adapter = adapter
 
@@ -144,7 +145,7 @@ class TransmitterActivity : AppCompatActivity() {
                 val currentTitle = songCursor.getString(songTitle)
                 val currentArtist = songCursor.getString(songArtist)
                 val currentLocation = songCursor.getString(songLocation)
-                adapter.addItem(currentTitle, currentArtist, currentLocation, ::runServ)
+                adapter.addItem(currentTitle, currentArtist, currentLocation)
             } while (songCursor.moveToNext())
         }
     }

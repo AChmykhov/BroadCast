@@ -6,44 +6,20 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         tools:context=".MusicListItem">
-
-    <com.daimajia.swipe.SwipeLayout
-            android:layout_width="0dp" android:layout_height="80dp" android:id="@+id/swipeMusicItem"
-            app:layout_constraintTop_toTopOf="parent" app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toEndOf="parent">
-        <!-- Bottom View Start-->
-        <LinearLayout
-                android:background="#66ddff00"
-                android:id="@+id/bottom_wrapper"
-                android:layout_width="160dp"
-                android:weightSum="1"
-                android:layout_height="match_parent">
-            <!--What you want to show-->
-            <Button
-                    android:text="Play"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent" android:id="@+id/chooseButton" android:layout_weight="1"/>
-        </LinearLayout>
-        <!-- Bottom View End-->
-
-        <!-- Surface View Start -->
-        <LinearLayout
-                android:padding="10dp"
-                android:background="#ffffff"
+    <LinearLayout
+            android:orientation="vertical"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" android:id="@+id/itemLayout">
+        <TextView
+                android:text="TextView"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent" android:orientation="vertical">
-            <!--What you want to show in SurfaceView-->
-            <TextView
-                    android:text="TextView"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content" android:id="@+id/titleTextView" android:layout_weight="1"
-                    android:textSize="20sp" android:fontFamily="sans-serif"/>
-            <TextView
-                    android:text="TextView"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content" android:id="@+id/artistTextView" android:layout_weight="1"/>
-        </LinearLayout>
-        <!-- Surface View End -->
-    </com.daimajia.swipe.SwipeLayout>
-
+                android:layout_height="wrap_content" android:id="@+id/titleTextView" android:textSize="20sp"/>
+        <Space
+                android:layout_width="match_parent"
+                android:layout_height="10dp"/>
+        <TextView
+                android:text="TextView"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" android:id="@+id/artistTextView"/>
+    </LinearLayout>
 </androidx.constraintlayout.widget.ConstraintLayout>
