@@ -73,14 +73,6 @@ class ReceiverActivity : AppCompatActivity() {
             )
             != PackageManager.PERMISSION_GRANTED
         ) {
-
-        val urlStr = "http://" + getData() + ":63342/song.mp3"
-        try {
-            DownloadFileFromURL().execute(urlStr)
-        } catch (ioe: Exception) {
-            Toast.makeText(this, "Problem with downloading song \n Exception: $ioe", Toast.LENGTH_LONG).show()
-            finish()
-        }
             if (!(ActivityCompat.shouldShowRequestPermissionRationale(
                     thisActivity,
                     Manifest.permission.WRITE_EXTERNAL_STORAGE
