@@ -133,14 +133,13 @@ class TransmitterActivity : AppCompatActivity() {
             val queue = Volley.newRequestQueue(this)
             val time = currentTimeMillis() + latency
             val responses = mutableListOf<String>()
-            for (ip in ipList) {
             val stringRequest = StringRequest(Request.Method.GET, "http://$ip:63343?timeToStart:=$time",
                 Response.Listener<String> { response ->
                     responses.add(response)
                 },
                 Response.ErrorListener { responses.add("Error") })
             queue.add(stringRequest)}
-        }
+        runOnUiThread {Toast.makeText(this, "Request made", Toast.LENGTH_SHORT).show()}
         }
 
     fun changeSong() {

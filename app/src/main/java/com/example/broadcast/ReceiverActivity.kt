@@ -39,6 +39,7 @@ class ReceiverActivity : AppCompatActivity() {
             val params = session.parameters
             if (params.containsKey("startToPlay")) {
                 params["startToPlay"]?.get(0)?.let { startPlaying(it) }
+                runOnUiThread {Toast.makeText(this@ReceiverActivity, "Resume signal received", Toast.LENGTH_SHORT).show()}
             }
             return newFixedLengthResponse("Hello World!")
         }
@@ -50,8 +51,9 @@ class ReceiverActivity : AppCompatActivity() {
     }
 
     fun startPlaying(Time: String) {
-        runOnUiThread {Toast.makeText(this, "Resume signal recieved", Toast.LENGTH_SHORT).show()}
-        mediaplayer.seekTo(Time.toInt())
+        runOnUiThread {Toast.makeText(this, "Resume signal understood", Toast.LENGTH_SHORT).show()}
+        val time = System.currentTimeMillis()
+        mediaplayer.seekTo((Time.toLong() - time).toInt())
         mediaplayer.start()
     }
 
@@ -205,7 +207,7 @@ class ReceiverActivity : AppCompatActivity() {
         override fun onPostExecute(fileUri: String?) {
             val root = Environment.getExternalStorageDirectory().toString()
             val thisActivity = this@ReceiverActivity
-            mediaplayer = MediaPlayer.create(thisActivity, Uri.parse("$root/Music/song.mp3"))
+            mediaplayer = MediaPlayer.create(thisActivity, Uri.parse(root + "/Music/song.mp3"))
         }
 
     }
