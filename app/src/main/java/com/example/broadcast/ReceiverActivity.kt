@@ -1,5 +1,6 @@
 package com.example.broadcast
 
+import android.Manifest
 import android.content.pm.PackageManager
 import android.media.MediaPlayer
 import android.net.Uri
@@ -8,19 +9,22 @@ import android.os.Bundle
 import android.os.Environment
 import android.util.Log
 import android.view.View
+import android.view.View.Z
+import android.widget.ImageButton
 import android.widget.SeekBar
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
 import kotlinx.android.synthetic.main.activity_receiver.*
 import java.io.BufferedInputStream
 import java.io.FileOutputStream
 import java.net.URL
 
-
 class ReceiverActivity : AppCompatActivity() {
 
-    public var mediaplayer = MediaPlayer()
+    private var mediaplayer = MediaPlayer()
     private var pause = true
 
     companion object {
@@ -32,8 +36,8 @@ class ReceiverActivity : AppCompatActivity() {
         return Integer.parseInt(delay.text.toString())
     }
 
-    fun getData(): String {
-        return intent.getStringExtra(IPPort).toString()
+    fun getData(): String? {
+        return intent.getStringExtra(IPPort)
     }
 
     fun bar() {
@@ -61,14 +65,33 @@ class ReceiverActivity : AppCompatActivity() {
 
         val textview = findViewById<TextView>(R.id.IPPortReceiverTextView)
         textview.setText(getData())
+        val thisActivity = this@ReceiverActivity
+        if (ContextCompat.checkSelfPermission(
+                thisActivity,
+                Manifest.permission.WRITE_EXTERNAL_STORAGE
+            )
+            != PackageManager.PERMISSION_GRANTED
+        ) {
 
-        try {
-            DownloadFileFromURL().execute("http://" + getData() + "/song.mp3")
-        } catch (ioe: Exception) {
-            mediaplayer = MediaPlayer.create(this, Uri.parse("http://d.zaix.ru/dQYH.mp3"))
-
-            Toast.makeText(this, "$ioe", Toast.LENGTH_LONG).show()
+            if (!(ActivityCompat.shouldShowRequestPermissionRationale(
+                    thisActivity,
+                    Manifest.permission.WRITE_EXTERNAL_STORAGE
+                ))
+            ) {
+                ActivityCompat.requestPermissions(
+                    thisActivity,
+                    arrayOf(Manifest.permission.WRITE_EXTERNAL_STORAGE), 1
+                )
+            }
         }
+        val urlStr = "http://" + getData() + ":63342/song.mp3"
+        try {
+            DownloadFileFromURL().execute(urlStr)
+        } catch (ioe: Exception) {
+            Toast.makeText(this, "Problem with downloading song \n Exception: $ioe", Toast.LENGTH_LONG).show()
+            finish()
+        }
+
         val middle: Int = findViewById<SeekBar>(R.id.DelayBar).max / 2
         findViewById<SeekBar>(R.id.DelayBar).progress = middle
         val min = findViewById<TextView>(R.id.MinimumTextView)
@@ -124,13 +147,11 @@ class ReceiverActivity : AppCompatActivity() {
         override fun onPreExecute() {}
 
         override fun doInBackground(vararg f_url: String): String? {
-            val count: Int
             try {
                 val url = URL(f_url[0])
                 val conection = url.openConnection()
                 conection.connect()
 
-                val lenghtOfFile = conection.contentLength
                 val input = BufferedInputStream(url.openStream(), 8192)
                 val output = FileOutputStream(
                     Environment.getExternalStorageDirectory().toString() + "/Music/song.mp3"
@@ -160,10 +181,11 @@ class ReceiverActivity : AppCompatActivity() {
 
         override fun onPostExecute(fileUri: String?) {
             val root = Environment.getExternalStorageDirectory().toString()
-            var thisActivity = this@ReceiverActivity
+            val thisActivity = this@ReceiverActivity
             mediaplayer = MediaPlayer.create(thisActivity, Uri.parse(root + "/Music/song.mp3"))
+            var play = findViewById<ImageButton>(R.id.PLAY)
+            play.visibility = View.VISIBLE
         }
 
     }
-
 }

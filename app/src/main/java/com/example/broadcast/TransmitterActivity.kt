@@ -13,7 +13,9 @@ import android.os.Bundle
 import android.os.Environment
 import android.util.Log
 import android.view.View
-import android.widget.*
+import android.widget.ImageView
+import android.widget.TextView
+import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
@@ -29,10 +31,10 @@ import java.io.File
 import java.io.IOException
 import java.util.regex.Pattern
 import fi.iki.elonen.NanoHTTPD
+import kotlinx.android.synthetic.main.activity_main.*
 import java.io.ByteArrayOutputStream
 import java.io.FileOutputStream
 import java.util.*
-
 
 class TransmitterActivity : AppCompatActivity() {
     var path: String = ""
@@ -42,29 +44,26 @@ class TransmitterActivity : AppCompatActivity() {
     inner class App @Throws(IOException::class) constructor() : NanoHTTPD(63342) {
 
         init {
-            start(NanoHTTPD.SOCKET_READ_TIMEOUT, false)
+            start(SOCKET_READ_TIMEOUT, false)
         }
 
         @RequiresApi(Build.VERSION_CODES.O)
-        override fun serve(session: IHTTPSession): NanoHTTPD.Response {
+        override fun serve(session: IHTTPSession): Response {
 
-            return NanoHTTPD.newChunkedResponse(Response.Status.OK, ".mp3", readFileAsTextUsingInputStream(path))
+            return newChunkedResponse(Response.Status.OK, ".mp3", readFileAsTextUsingInputStream(path))
         }
 
     }
 
     fun readFileAsTextUsingInputStream(fileName: String) = File(fileName).inputStream()
 
-    private fun getLocalIpAddress(): String? {
-        try {
-
-            val wifiManager: WifiManager = getApplicationContext().getSystemService(Context.WIFI_SERVICE) as WifiManager
-            return ipToString(wifiManager.connectionInfo.ipAddress)
-        } catch (ex: Exception) {
-            Log.e("IP Address", ex.toString())
+    private fun getLocalIpAddress(): String {
+        val wifiManager = applicationContext.getSystemService(Context.WIFI_SERVICE) as WifiManager
+        if (wifiManager.connectionInfo.ipAddress == 0) {
+            Toast.makeText(this, "No connection to Wi-Fi network", Toast.LENGTH_LONG).show()
+            finish()
         }
-
-        return null
+        return ipToString(wifiManager.connectionInfo.ipAddress)
     }
 
     private fun ipToString(i: Int): String {
@@ -75,25 +74,22 @@ class TransmitterActivity : AppCompatActivity() {
 
     }
 
-    fun runServ(view: View) {
+    fun runServ(@Suppress("UNUSED_PARAMETER") view: View) {
         try {
             App()
         } catch (ioe: IOException) {
             System.err.println("Couldn't start server:\n$ioe")
+            Toast.makeText(this, "Couldn't start server:\n$ioe", Toast.LENGTH_LONG).show()
+            finish()
         }
 
-    }
-
-    fun getData(): String {
-        return getLocalIpAddress().toString()
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_transmitter)
-        val etqr = getData() + ":63342"
+        val etqr = getLocalIpAddress()
         val thisActivity = this@TransmitterActivity
-        findViewById<TextView>(R.id.showIPTextView).setText(getData())
         if (ContextCompat.checkSelfPermission(
                 thisActivity,
                 Manifest.permission.WRITE_EXTERNAL_STORAGE
@@ -112,8 +108,8 @@ class TransmitterActivity : AppCompatActivity() {
                 )
             }
         }
-        showIPQR = findViewById(R.id.ShowIPQR) as ImageView
-        if (etqr.trim { it <= ' ' }.length == 0) {
+        showIPQR = findViewById<ImageView>(R.id.ShowIPQR)
+        if (etqr.trim { it <= ' ' }.isEmpty()) {
             Toast.makeText(this@TransmitterActivity, "Enter String!", Toast.LENGTH_SHORT).show()
         } else {
             try {
@@ -128,9 +124,6 @@ class TransmitterActivity : AppCompatActivity() {
         }
         val showIP = findViewById<TextView>(R.id.showIPTextView)
         showIP.text = etqr
-        ExitT.setOnClickListener {
-            finish()
-        }
     }
 
     fun saveImage(myBitmap: Bitmap?): String {
@@ -167,6 +160,12 @@ class TransmitterActivity : AppCompatActivity() {
 
         return ""
 
+    }
+
+    companion object {
+
+        val QRcodeWidth = 500
+        private val IMAGE_DIRECTORY = "/QRcodeDemonuts"
     }
 
     @Throws(WriterException::class)
@@ -207,17 +206,11 @@ class TransmitterActivity : AppCompatActivity() {
         return bitmap
     }
 
-    companion object {
-
-        val QRcodeWidth = 500
-        private val IMAGE_DIRECTORY = "/QRcodeDemonuts"
+    fun exitFromParty(@Suppress("UNUSED_PARAMETER") view: View) {
+        finish()
     }
 
-    fun exitFromParty(view: View) {
-        // PUT YOUR CODE HERE
-    }
-
-    fun stopSong(view: View) {
+    fun stopSong(@Suppress("UNUSED_PARAMETER") view: View) {
         // PUT YOUR CODE HERE
     }
 
@@ -232,7 +225,7 @@ class TransmitterActivity : AppCompatActivity() {
         }
     }
 
-    fun changeSong(view: View) {
+    fun changeSong(@Suppress("UNUSED_PARAMETER") view: View) {
         MaterialFilePicker()
             .withActivity(this)
             .withRequestCode(1000)
@@ -243,11 +236,16 @@ class TransmitterActivity : AppCompatActivity() {
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        super.onActivityResult(requestCode, resultCode, data)
+        val resultPath = data?.getStringExtra(FilePickerActivity.RESULT_FILE_PATH)
+        if (resultPath == null) {
+            Toast.makeText(this, "Problem with file path parsing", Toast.LENGTH_LONG).show()
+        } else {
+            super.onActivityResult(requestCode, resultCode, data)
 
-        if (requestCode == 1000 && resultCode == Activity.RESULT_OK) {
-            val filePath = data!!.getStringExtra(FilePickerActivity.RESULT_FILE_PATH)
-            path = filePath
+
+            if (requestCode == 1000 && resultCode == Activity.RESULT_OK) {
+                path = resultPath
+            }
         }
     }
 
@@ -263,4 +261,5 @@ class TransmitterActivity : AppCompatActivity() {
             }
         }
     }
+
 }
