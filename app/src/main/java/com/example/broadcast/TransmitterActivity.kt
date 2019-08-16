@@ -30,14 +30,12 @@ import com.nbsp.materialfilepicker.MaterialFilePicker
 import com.nbsp.materialfilepicker.ui.FilePickerActivity
 import fi.iki.elonen.NanoHTTPD
 import kotlinx.android.synthetic.main.activity_transmitter.*
-import java.io.File
-import java.io.IOException
-import java.util.regex.Pattern
-import fi.iki.elonen.NanoHTTPD
-import kotlinx.android.synthetic.main.activity_main.*
 import java.io.ByteArrayOutputStream
+import java.io.File
 import java.io.FileOutputStream
+import java.io.IOException
 import java.util.*
+import java.util.regex.Pattern
 
 class TransmitterActivity : AppCompatActivity() {
 
@@ -135,9 +133,7 @@ class TransmitterActivity : AppCompatActivity() {
                 e.printStackTrace()
             }
         }
-        val showIP = findViewById<TextView>(R.id.showIPTextView)
-        showIP.text = etqr
-    }
+
         if (ContextCompat.checkSelfPermission(thisActivity,
                 Manifest.permission.WRITE_EXTERNAL_STORAGE)
             != PackageManager.PERMISSION_GRANTED) {

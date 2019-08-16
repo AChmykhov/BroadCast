@@ -79,7 +79,7 @@ class MainActivity : AppCompatActivity() {
                 Toast.makeText(this, "No connection to Wi-Fi network", Toast.LENGTH_LONG).show()
             } else {
                 val receiverIntent = Intent(this, ReceiverActivity::class.java)
-                receiverIntent.putExtra(ReceiverActivity.IPPort, data.text.toString())
+                receiverIntent.putExtra(ReceiverActivity.ipPort, data.text.toString())
                 startActivity(receiverIntent)
             }
         }

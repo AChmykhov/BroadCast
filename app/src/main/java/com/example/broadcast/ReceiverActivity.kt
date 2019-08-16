@@ -37,7 +37,7 @@ class ReceiverActivity : AppCompatActivity() {
 
 
     fun getData(): String? {
-        return intent.getStringExtra(IPPort)
+        return intent.getStringExtra(ipPort)
     }
 
     fun bar() {
