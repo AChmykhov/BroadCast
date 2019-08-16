@@ -11,9 +11,11 @@ import android.net.wifi.WifiManager
 import android.os.Build
 import android.os.Bundle
 import android.os.Environment
+import android.provider.MediaStore
 import android.util.Log
 import android.view.View
 import android.widget.ImageView
+import android.widget.ListView
 import android.widget.TextView
 import android.widget.Toast
 import androidx.annotation.RequiresApi
@@ -26,20 +28,21 @@ import com.google.zxing.WriterException
 import com.google.zxing.common.BitMatrix
 import com.nbsp.materialfilepicker.MaterialFilePicker
 import com.nbsp.materialfilepicker.ui.FilePickerActivity
-import kotlinx.android.synthetic.main.activity_transmitter.*
-import java.io.File
-import java.io.IOException
-import java.util.regex.Pattern
 import fi.iki.elonen.NanoHTTPD
-import kotlinx.android.synthetic.main.activity_main.*
+import kotlinx.android.synthetic.main.activity_transmitter.*
 import java.io.ByteArrayOutputStream
+import java.io.File
 import java.io.FileOutputStream
+import java.io.IOException
 import java.util.*
+import java.util.regex.Pattern
 
 class TransmitterActivity : AppCompatActivity() {
+
     var path: String = ""
     internal var bitmap: Bitmap? = null
     private var showIPQR: ImageView? = null
+    lateinit var adapter: MusicListAdapter
 
     inner class App @Throws(IOException::class) constructor() : NanoHTTPD(63342) {
 
@@ -55,8 +58,8 @@ class TransmitterActivity : AppCompatActivity() {
 
     }
 
-    fun readFileAsTextUsingInputStream(fileName: String) = File(fileName).inputStream()
 
+    fun readFileAsTextUsingInputStream(fileName: String) = File(fileName).inputStream()
 
     private fun getLocalIpAddress(): String {
         val wifiManager = applicationContext.getSystemService(Context.WIFI_SERVICE) as WifiManager
@@ -75,7 +78,8 @@ class TransmitterActivity : AppCompatActivity() {
 
     }
 
-    fun runServ(@Suppress("UNUSED_PARAMETER") view: View) {
+    public fun runServ(@Suppress("UNUSED_PARAMETER") view: View, _path: String) {
+        path = _path
         try {
             App()
         } catch (ioe: IOException) {
@@ -86,10 +90,15 @@ class TransmitterActivity : AppCompatActivity() {
 
     }
 
+    fun getData(): String {
+        return getLocalIpAddress().toString()
+    }
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_transmitter)
+        findViewById<TextView>(R.id.ShowIPTextView).setText(getData())
         val etqr = getLocalIpAddress()
 
         val thisActivity = this@TransmitterActivity
@@ -123,47 +132,26 @@ class TransmitterActivity : AppCompatActivity() {
             } catch (e: WriterException) {
                 e.printStackTrace()
             }
-
-        }
-        val showIP = findViewById<TextView>(R.id.showIPTextView)
-        showIP.text = etqr
-    }
-
-    fun saveImage(myBitmap: Bitmap?): String {
-        val bytes = ByteArrayOutputStream()
-        myBitmap!!.compress(Bitmap.CompressFormat.JPEG, 90, bytes)
-        val wallpaperDirectory = File(
-            Environment.getExternalStorageDirectory().toString() + IMAGE_DIRECTORY
-        )
-        if (!wallpaperDirectory.exists()) {
-            Log.d("dirrrrrr", "" + wallpaperDirectory.mkdirs())
-            wallpaperDirectory.mkdirs()
         }
 
-        try {
-            val f = File(
-                wallpaperDirectory, Calendar.getInstance()
-                    .timeInMillis.toString() + ".jpg"
-            )
-            f.createNewFile()
-            val fo = FileOutputStream(f)
-            fo.write(bytes.toByteArray())
-            MediaScannerConnection.scanFile(
-                this,
-                arrayOf(f.path),
-                arrayOf("image/jpeg"), null
-            )
-            fo.close()
-            Log.d("TAG", "File Saved::--->" + f.absolutePath)
+        if (ContextCompat.checkSelfPermission(thisActivity,
+                Manifest.permission.WRITE_EXTERNAL_STORAGE)
+            != PackageManager.PERMISSION_GRANTED) {
 
-            return f.absolutePath
-        } catch (e1: IOException) {
-            e1.printStackTrace()
+            if (!(ActivityCompat.shouldShowRequestPermissionRationale(thisActivity,
+                    Manifest.permission.WRITE_EXTERNAL_STORAGE))) {
+                ActivityCompat.requestPermissions(thisActivity,
+                    arrayOf(Manifest.permission.WRITE_EXTERNAL_STORAGE), 1)
+            }
         }
 
-        return ""
+        createMusicList()
 
-
+        val showIP = findViewById<TextView>(R.id.ShowIPTextView)
+        showIP.text = getLocalIpAddress()
+        ExitT.setOnClickListener {
+            finish()
+        }
     }
 
     companion object {
@@ -210,23 +198,60 @@ class TransmitterActivity : AppCompatActivity() {
         return bitmap
     }
 
-    fun exitFromParty(@Suppress("UNUSED_PARAMETER") view: View) {
-        finish()
-    }
 
+fun saveImage(myBitmap: Bitmap?): String {
+        val bytes = ByteArrayOutputStream()
+        myBitmap!!.compress(Bitmap.CompressFormat.JPEG, 90, bytes)
+        val wallpaperDirectory = File(
+            Environment.getExternalStorageDirectory().toString() + IMAGE_DIRECTORY
+        )
+        if (!wallpaperDirectory.exists()) {
+            Log.d("dirrrrrr", "" + wallpaperDirectory.mkdirs())
+            wallpaperDirectory.mkdirs()
+        }
 
-    fun stopSong(@Suppress("UNUSED_PARAMETER") view: View) {
-        // PUT YOUR CODE HERE
-    }
-
-    fun resumeSong(view: View) {
-        Toast.makeText(this, "YES!", Toast.LENGTH_SHORT).show()
         try {
-            Toast.makeText(this, "Good!", Toast.LENGTH_LONG).show()
-            runServ(view)
-        } catch (ioe: Exception) {
-            System.err.println("Couldn't start server:\n$ioe")
-            Toast.makeText(this, "$ioe", Toast.LENGTH_LONG).show()
+            val f = File(
+                wallpaperDirectory, Calendar.getInstance()
+                    .timeInMillis.toString() + ".jpg"
+            )
+            f.createNewFile()
+            val fo = FileOutputStream(f)
+            fo.write(bytes.toByteArray())
+            MediaScannerConnection.scanFile(
+                this,
+                arrayOf(f.path),
+                arrayOf("image/jpeg"), null
+            )
+            fo.close()
+            Log.d("TAG", "File Saved::--->" + f.absolutePath)
+
+            return f.absolutePath
+        } catch (e1: IOException) {
+            e1.printStackTrace()
+        }
+
+        return ""
+    }
+
+
+
+    fun createMusicList() {
+        var musicList = findViewById<ListView>(R.id.MusicList)
+        adapter = MusicListAdapter(this, this::runServ)
+        getMusic()
+        musicList.adapter = adapter
+
+        musicList.setOnItemClickListener { parent, view, position, id ->
+            path = adapter.objects[position].location
+            Toast.makeText(this, "YES!", Toast.LENGTH_SHORT).show()
+            try {
+                Toast.makeText(this, "Good!", Toast.LENGTH_LONG).show()
+                runServ(view, path)
+            } catch (ioe: Exception) {
+                System.err.println("Couldn't start server:\n$ioe")
+                Toast.makeText(this, "$ioe", Toast.LENGTH_LONG).show()
+            }
         }
     }
 
@@ -238,6 +263,25 @@ class TransmitterActivity : AppCompatActivity() {
             .withFilterDirectories(false) // Set directories filterable (false by default)
             .withHiddenFiles(true) // Show hidden files and folders
             .start()
+    }
+
+    fun getMusic() {
+        var contecntResolver = getContentResolver()
+        var songUri = MediaStore.Audio.Media.EXTERNAL_CONTENT_URI
+        var songCursor = contentResolver.query(songUri, null, null, null, null)
+
+        if (songCursor != null && songCursor.moveToFirst()) {
+            var songTitle = songCursor.getColumnIndex(MediaStore.Audio.Media.TITLE)
+            var songArtist = songCursor.getColumnIndex(MediaStore.Audio.Media.ARTIST)
+            var songLocation = songCursor.getColumnIndex(MediaStore.Audio.Media.DATA)
+
+            do {
+                val currentTitle = songCursor.getString(songTitle)
+                val currentArtist = songCursor.getString(songArtist)
+                val currentLocation = songCursor.getString(songLocation)
+                adapter.addItem(currentTitle, currentArtist, currentLocation)
+            } while (songCursor.moveToNext())
+        }
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
@@ -266,5 +310,4 @@ class TransmitterActivity : AppCompatActivity() {
             }
         }
     }
-
 }

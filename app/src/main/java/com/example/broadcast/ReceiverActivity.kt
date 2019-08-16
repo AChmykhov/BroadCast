@@ -9,7 +9,6 @@ import android.os.Bundle
 import android.os.Environment
 import android.util.Log
 import android.view.View
-import android.view.View.Z
 import android.widget.ImageButton
 import android.widget.SeekBar
 import android.widget.TextView
@@ -24,9 +23,7 @@ import java.net.URL
 
 class ReceiverActivity : AppCompatActivity() {
 
-
     private var mediaplayer = MediaPlayer()
-
     private var pause = true
 
     companion object {
@@ -40,7 +37,7 @@ class ReceiverActivity : AppCompatActivity() {
 
 
     fun getData(): String? {
-        return intent.getStringExtra(IPPort)
+        return intent.getStringExtra(ipPort)
     }
 
     fun bar() {
@@ -76,7 +73,6 @@ class ReceiverActivity : AppCompatActivity() {
             )
             != PackageManager.PERMISSION_GRANTED
         ) {
-
             if (!(ActivityCompat.shouldShowRequestPermissionRationale(
                     thisActivity,
                     Manifest.permission.WRITE_EXTERNAL_STORAGE
@@ -159,7 +155,7 @@ class ReceiverActivity : AppCompatActivity() {
 
                 val input = BufferedInputStream(url.openStream(), 8192)
                 val output = FileOutputStream(
-                    Environment.getRootDirectory().toString() + "/Music/song.mp3"
+                    Environment.getExternalStorageDirectory().toString() + "/Music/song.mp3"
                 )
 
                 val data = ByteArray(1024)

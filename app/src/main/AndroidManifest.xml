@@ -18,6 +18,10 @@
             android:theme="@style/AppTheme">
         <activity android:name=".ScanActivity">
         </activity>
+        <activity android:name=".MusicListItem">
+        </activity>
+        <activity android:name=".Test">
+        </activity>
         <activity android:name=".TransmitterActivity">
         </activity>
         <activity android:name=".ReceiverActivity">

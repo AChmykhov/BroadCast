@@ -7,30 +7,13 @@
         android:layout_height="match_parent"
         tools:context=".TransmitterActivity">
 
-
-    <LinearLayout
-            android:orientation="horizontal"
-            android:layout_width="0dp"
+    <TextView
+            android:text="@string/ip"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:id="@+id/linearLayout4"
-            app:layout_constraintTop_toTopOf="parent" app:layout_constraintStart_toStartOf="parent"
-            android:layout_marginTop="330dp" app:layout_constraintEnd_toEndOf="parent">
-        <Button
-                android:text="@string/change"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content" android:id="@+id/ChangeSongButton" android:layout_weight="1"
-                android:onClick="changeSong"/>
-        <Button
-                android:text="@string/stop"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content" android:id="@+id/StopButton" android:layout_weight="1"
-                android:onClick="stopSong"/>
-        <Button
-                android:text="@string/resume"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content" android:id="@+id/ResumeButton" android:layout_weight="1"
-                android:onClick="resumeSong"/>
-    </LinearLayout>
+            android:id="@+id/ShowIPTextView" android:textSize="25sp"
+            app:layout_constraintStart_toStartOf="parent" app:layout_constraintEnd_toEndOf="parent"
+            android:layout_marginBottom="8dp" app:layout_constraintBottom_toTopOf="@+id/MusicList"/>
     <Button
             android:text="@string/exit"
             android:layout_width="wrap_content"
@@ -39,6 +22,15 @@
             app:layout_constraintBottom_toBottomOf="parent" android:layout_marginEnd="17dp"
             android:layout_marginBottom="17dp"
             app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/MusicList"/>
+    <ListView
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:id="@+id/MusicList" android:layout_marginTop="365dp" android:layout_marginBottom="29dp"
+            app:layout_constraintEnd_toEndOf="parent" app:layout_constraintBottom_toTopOf="@+id/ExitT"
+            app:layout_constraintTop_toTopOf="parent" app:layout_constraintStart_toStartOf="parent"
+            android:layout_marginStart="8dp" android:layout_marginEnd="8dp"
+    />
             android:onClick="exitFromParty"/>
     <ImageView
             android:layout_width="317dp"
