@@ -1,5 +1,6 @@
 package com.example.broadcast
 
+import android.Manifest
 import android.content.pm.PackageManager
 import android.media.MediaPlayer
 import android.net.Uri
@@ -9,19 +10,23 @@ import android.os.Environment
 import android.util.Log
 import android.view.View
 import android.view.View.Z
+import android.widget.ImageButton
 import android.widget.SeekBar
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
 import kotlinx.android.synthetic.main.activity_receiver.*
 import java.io.BufferedInputStream
 import java.io.FileOutputStream
 import java.net.URL
 
-
 class ReceiverActivity : AppCompatActivity() {
 
-    var mediaplayer = MediaPlayer()
+
+    private var mediaplayer = MediaPlayer()
+
     private var pause = true
 
     companion object {
@@ -33,17 +38,14 @@ class ReceiverActivity : AppCompatActivity() {
         return Integer.parseInt(delay.text.toString())
     }
 
-    fun getData(): String {
-        val ipPort: String? = intent.getStringExtra(ipPort)
-        if (ipPort == null) {
-            Toast.makeText(this, "Invalid IP address entered\n No server on this IP", Toast.LENGTH_LONG).show()
-            finish()
-        }
-        return ipPort.toString()
+
+    fun getData(): String? {
+        return intent.getStringExtra(IPPort)
     }
 
     fun bar() {
-        val delaybar = findViewById<SeekBar>(R.id.DelayBar)
+        var delaybar = findViewById<SeekBar>(R.id.DelayBar)
+
 
         delaybar.setOnSeekBarChangeListener(
             object : SeekBar.OnSeekBarChangeListener {
@@ -67,6 +69,25 @@ class ReceiverActivity : AppCompatActivity() {
 
         val textview = findViewById<TextView>(R.id.IPPortReceiverTextView)
         textview.setText(getData())
+        val thisActivity = this@ReceiverActivity
+        if (ContextCompat.checkSelfPermission(
+                thisActivity,
+                Manifest.permission.WRITE_EXTERNAL_STORAGE
+            )
+            != PackageManager.PERMISSION_GRANTED
+        ) {
+
+            if (!(ActivityCompat.shouldShowRequestPermissionRationale(
+                    thisActivity,
+                    Manifest.permission.WRITE_EXTERNAL_STORAGE
+                ))
+            ) {
+                ActivityCompat.requestPermissions(
+                    thisActivity,
+                    arrayOf(Manifest.permission.WRITE_EXTERNAL_STORAGE), 1
+                )
+            }
+        }
 
         val urlStr = "http://" + getData() + ":63342/song.mp3"
         try {
@@ -75,6 +96,7 @@ class ReceiverActivity : AppCompatActivity() {
             Toast.makeText(this, "Problem with downloading song \n Exception: $ioe", Toast.LENGTH_LONG).show()
             finish()
         }
+
         val middle: Int = findViewById<SeekBar>(R.id.DelayBar).max / 2
         findViewById<SeekBar>(R.id.DelayBar).progress = middle
         val min = findViewById<TextView>(R.id.MinimumTextView)
@@ -163,11 +185,12 @@ class ReceiverActivity : AppCompatActivity() {
         override fun onProgressUpdate(vararg progress: String) {}
 
         override fun onPostExecute(fileUri: String?) {
-            val root = Environment.getRootDirectory().toString()
+            val root = Environment.getExternalStorageDirectory().toString()
             val thisActivity = this@ReceiverActivity
-            mediaplayer = MediaPlayer.create(thisActivity, Uri.parse("$root/Music/song.mp3"))
+            mediaplayer = MediaPlayer.create(thisActivity, Uri.parse(root + "/Music/song.mp3"))
+            var play = findViewById<ImageButton>(R.id.PLAY)
+            play.visibility = View.VISIBLE
         }
 
     }
-
 }

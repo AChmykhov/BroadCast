@@ -5,17 +5,25 @@ import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.graphics.Bitmap
+import android.media.MediaScannerConnection
 import android.net.wifi.WifiManager
 import android.os.Build
 import android.os.Bundle
+import android.os.Environment
 import android.util.Log
 import android.view.View
+import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import com.google.zxing.BarcodeFormat
+import com.google.zxing.MultiFormatWriter
+import com.google.zxing.WriterException
+import com.google.zxing.common.BitMatrix
 import com.nbsp.materialfilepicker.MaterialFilePicker
 import com.nbsp.materialfilepicker.ui.FilePickerActivity
 import kotlinx.android.synthetic.main.activity_transmitter.*
@@ -24,11 +32,14 @@ import java.io.IOException
 import java.util.regex.Pattern
 import fi.iki.elonen.NanoHTTPD
 import kotlinx.android.synthetic.main.activity_main.*
-
+import java.io.ByteArrayOutputStream
+import java.io.FileOutputStream
+import java.util.*
 
 class TransmitterActivity : AppCompatActivity() {
-
     var path: String = ""
+    internal var bitmap: Bitmap? = null
+    private var showIPQR: ImageView? = null
 
     inner class App @Throws(IOException::class) constructor() : NanoHTTPD(63342) {
 
@@ -44,8 +55,8 @@ class TransmitterActivity : AppCompatActivity() {
 
     }
 
-
     fun readFileAsTextUsingInputStream(fileName: String) = File(fileName).inputStream()
+
 
     private fun getLocalIpAddress(): String {
         val wifiManager = applicationContext.getSystemService(Context.WIFI_SERVICE) as WifiManager
@@ -79,10 +90,9 @@ class TransmitterActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_transmitter)
-        findViewById<TextView>(R.id.ShowIPTextView).text = getLocalIpAddress()
+        val etqr = getLocalIpAddress()
 
         val thisActivity = this@TransmitterActivity
-
         if (ContextCompat.checkSelfPermission(
                 thisActivity,
                 Manifest.permission.WRITE_EXTERNAL_STORAGE
@@ -101,15 +111,109 @@ class TransmitterActivity : AppCompatActivity() {
                 )
             }
         }
+        showIPQR = findViewById<ImageView>(R.id.ShowIPQR)
+        if (etqr.trim { it <= ' ' }.isEmpty()) {
+            Toast.makeText(this@TransmitterActivity, "Enter String!", Toast.LENGTH_SHORT).show()
+        } else {
+            try {
+                bitmap = TextToImageEncode(etqr)
+                showIPQR!!.setImageBitmap(bitmap)
+                val path = saveImage(bitmap)  //give read write permission
+                Toast.makeText(this@TransmitterActivity, "QRCode saved to -> $path", Toast.LENGTH_SHORT).show()
+            } catch (e: WriterException) {
+                e.printStackTrace()
+            }
 
-        val showIP = findViewById<TextView>(R.id.ShowIPTextView)
-        showIP.text = getLocalIpAddress()
+        }
+        val showIP = findViewById<TextView>(R.id.showIPTextView)
+        showIP.text = etqr
     }
 
+    fun saveImage(myBitmap: Bitmap?): String {
+        val bytes = ByteArrayOutputStream()
+        myBitmap!!.compress(Bitmap.CompressFormat.JPEG, 90, bytes)
+        val wallpaperDirectory = File(
+            Environment.getExternalStorageDirectory().toString() + IMAGE_DIRECTORY
+        )
+        if (!wallpaperDirectory.exists()) {
+            Log.d("dirrrrrr", "" + wallpaperDirectory.mkdirs())
+            wallpaperDirectory.mkdirs()
+        }
+
+        try {
+            val f = File(
+                wallpaperDirectory, Calendar.getInstance()
+                    .timeInMillis.toString() + ".jpg"
+            )
+            f.createNewFile()
+            val fo = FileOutputStream(f)
+            fo.write(bytes.toByteArray())
+            MediaScannerConnection.scanFile(
+                this,
+                arrayOf(f.path),
+                arrayOf("image/jpeg"), null
+            )
+            fo.close()
+            Log.d("TAG", "File Saved::--->" + f.absolutePath)
+
+            return f.absolutePath
+        } catch (e1: IOException) {
+            e1.printStackTrace()
+        }
+
+        return ""
+
+
+    }
+
+    companion object {
+
+        val QRcodeWidth = 500
+        private val IMAGE_DIRECTORY = "/QRcodeDemonuts"
+    }
+
+    @Throws(WriterException::class)
+    private fun TextToImageEncode(Value: String): Bitmap? {
+        val bitMatrix: BitMatrix
+        try {
+            bitMatrix = MultiFormatWriter().encode(
+                Value,
+                BarcodeFormat.QR_CODE,
+                QRcodeWidth, QRcodeWidth, null
+            )
+
+        } catch (Illegalargumentexception: IllegalArgumentException) {
+
+            return null
+        }
+
+        val bitMatrixWidth = bitMatrix.getWidth()
+
+        val bitMatrixHeight = bitMatrix.getHeight()
+
+        val pixels = IntArray(bitMatrixWidth * bitMatrixHeight)
+
+        for (y in 0 until bitMatrixHeight) {
+            val offset = y * bitMatrixWidth
+
+            for (x in 0 until bitMatrixWidth) {
+
+                pixels[offset + x] = if (bitMatrix.get(x, y))
+                    resources.getColor(R.color.black)
+                else
+                    resources.getColor(R.color.white)
+            }
+        }
+        val bitmap = Bitmap.createBitmap(bitMatrixWidth, bitMatrixHeight, Bitmap.Config.ARGB_4444)
+
+        bitmap.setPixels(pixels, 0, 500, 0, 0, bitMatrixWidth, bitMatrixHeight)
+        return bitmap
+    }
 
     fun exitFromParty(@Suppress("UNUSED_PARAMETER") view: View) {
         finish()
     }
+
 
     fun stopSong(@Suppress("UNUSED_PARAMETER") view: View) {
         // PUT YOUR CODE HERE
@@ -162,4 +266,5 @@ class TransmitterActivity : AppCompatActivity() {
             }
         }
     }
+
 }
