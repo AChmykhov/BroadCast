@@ -16,7 +16,7 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
     }
 
-    fun StartParty(@Suppress("UNUSED_PARAMETER")view: View) {
+    fun startParty(@Suppress("UNUSED_PARAMETER")view: View) {
         val wifiManager = applicationContext.getSystemService(Context.WIFI_SERVICE) as WifiManager
         if (!(wifiManager.isWifiEnabled)) {
             Toast.makeText(this, "No connection to Wi-Fi network", Toast.LENGTH_LONG).show()
