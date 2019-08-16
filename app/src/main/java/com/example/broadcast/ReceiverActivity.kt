@@ -3,22 +3,56 @@ package com.example.broadcast
 import android.content.pm.PackageManager
 import android.media.MediaPlayer
 import android.net.Uri
+import android.os.AsyncTask
 import android.os.Bundle
+import android.os.Environment
+import android.util.Log
 import android.view.View
-import android.view.View.Z
 import android.widget.SeekBar
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import com.android.volley.Request
+import com.android.volley.Response
+import com.android.volley.toolbox.StringRequest
+import com.android.volley.toolbox.Volley
+import fi.iki.elonen.NanoHTTPD
 import kotlinx.android.synthetic.main.activity_receiver.*
+import java.io.BufferedInputStream
+import java.io.FileOutputStream
+import java.io.IOException
+import java.net.URL
+
 
 class ReceiverActivity : AppCompatActivity() {
 
     private var mediaplayer = MediaPlayer()
     private var pause = true
 
+    inner class recieverServer @Throws(IOException::class) constructor() : NanoHTTPD(63343) {
+
+        init {
+            start(SOCKET_READ_TIMEOUT, false)
+        }
+
+        override fun serve(session: IHTTPSession): Response {
+            val params = session.parameters
+            if (params.containsKey("startToPlay")) {
+                params["startToPlay"]?.get(0)?.let { startPlaying(it) }
+            }
+            return newFixedLengthResponse("Hello World!")
+        }
+
+    }
+
     companion object {
         const val IPPort = "IP:Port_of_connection"
+    }
+
+    fun startPlaying(Time: String) {
+        runOnUiThread {Toast.makeText(this, "Resume signal recieved", Toast.LENGTH_SHORT).show()}
+        mediaplayer.seekTo(Time.toInt())
+        mediaplayer.start()
     }
 
     fun getDelay(): Int {
@@ -30,7 +64,12 @@ class ReceiverActivity : AppCompatActivity() {
         return intent.getStringExtra(IPPort)
     }
 
-    fun bar() {Z
+    fun runServer() {
+            recieverServer()
+    }
+
+    fun bar() {
+
         var delaybar = findViewById<SeekBar>(R.id.DelayBar)
 
         delaybar.setOnSeekBarChangeListener(
@@ -55,8 +94,24 @@ class ReceiverActivity : AppCompatActivity() {
 
         val textview = findViewById<TextView>(R.id.IPPortReceiverTextView)
         textview.setText(getData())
+        val ip = getData()
+        val urlStr = "http://$ip:63342/song.mp3"
+        try {
+            DownloadFileFromURL().execute(urlStr)
+        } catch (ioe: Exception) {
+            Toast.makeText(this, "Problem with downloading song \n Exception: $ioe", Toast.LENGTH_LONG).show()
+            finish()
+        }
 
-        mediaplayer = MediaPlayer.create(this, Uri.parse("http://d.zaix.ru/dQYH.mp3"))
+        val queue = Volley.newRequestQueue(this)
+        var Response_to_request = ""
+        val stringRequest = StringRequest(
+            Request.Method.GET, "http://$ip:63342?Downloaded=true",
+            Response.Listener<String> { response ->
+                Response_to_request = response
+            },
+            Response.ErrorListener {Response_to_request = "Error" })
+        queue.add(stringRequest)
 
         val middle: Int = findViewById<SeekBar>(R.id.DelayBar).max / 2
         findViewById<SeekBar>(R.id.DelayBar).progress = middle
@@ -64,7 +119,8 @@ class ReceiverActivity : AppCompatActivity() {
         min.setText((-middle).toString())
         val max = findViewById<TextView>(R.id.MaximumTextView)
         max.setText(middle.toString())
-
+        runServer()
+        Toast.makeText(this, "Server run", Toast.LENGTH_SHORT).show()
         bar()
     }
 
@@ -105,5 +161,52 @@ class ReceiverActivity : AppCompatActivity() {
                 }
             }
         }
+    }
+
+
+
+    internal inner class DownloadFileFromURL : AsyncTask<String, String, String?>() {
+
+        override fun onPreExecute() {}
+
+        override fun doInBackground(vararg f_url: String): String? {
+            try {
+                val url = URL(f_url[0])
+                val conection = url.openConnection()
+                conection.connect()
+
+                val input = BufferedInputStream(url.openStream(), 8192)
+                val output = FileOutputStream(
+                    Environment.getExternalStorageDirectory().toString() + "/Music/song.mp3"
+                )
+
+                val data = ByteArray(1024)
+                var total: Long = 0
+                var count = input.read(data)
+                while (count != -1) {
+                    total += count.toLong()
+                    output.write(data, 0, count)
+                    count = input.read(data)
+                }
+
+                output.flush()
+                output.close()
+                input.close()
+
+            } catch (e: Exception) {
+                Log.e("Error: ", "$e")
+            }
+
+            return null
+        }
+
+        override fun onProgressUpdate(vararg progress: String) {}
+
+        override fun onPostExecute(fileUri: String?) {
+            val root = Environment.getExternalStorageDirectory().toString()
+            val thisActivity = this@ReceiverActivity
+            mediaplayer = MediaPlayer.create(thisActivity, Uri.parse("$root/Music/song.mp3"))
+        }
+
     }
 }

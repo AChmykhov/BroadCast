@@ -25,7 +25,7 @@
                 android:text="@string/change"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content" android:id="@+id/ChangeSongButton" android:layout_weight="1"
-                android:onClick="changeSong"/>
+                android:onClick="changeSongHandler"/>
         <Button
                 android:text="@string/stop"
                 android:layout_width="wrap_content"
@@ -46,4 +46,13 @@
             android:layout_marginBottom="17dp"
             app:layout_constraintEnd_toEndOf="parent"
             android:onClick="exitFromParty"/>
+    <TextView
+            android:text="Debug text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/debug_text"
+            app:layout_constraintTop_toBottomOf="@+id/linearLayout4" android:layout_marginBottom="8dp"
+            app:layout_constraintBottom_toTopOf="@+id/ExitT" app:layout_constraintEnd_toEndOf="parent"
+            android:layout_marginEnd="8dp" app:layout_constraintStart_toStartOf="parent"
+            android:layout_marginStart="8dp"/>
 </androidx.constraintlayout.widget.ConstraintLayout>

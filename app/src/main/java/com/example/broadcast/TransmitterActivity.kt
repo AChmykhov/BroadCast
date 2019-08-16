@@ -6,44 +6,53 @@ import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.net.wifi.WifiManager
-import android.os.Build
 import android.os.Bundle
 import android.util.Log
 import android.view.View
 import android.widget.TextView
 import android.widget.Toast
-import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import com.android.volley.Request
+import com.android.volley.Response
+import com.android.volley.toolbox.StringRequest
+import com.android.volley.toolbox.Volley
 import com.nbsp.materialfilepicker.MaterialFilePicker
 import com.nbsp.materialfilepicker.ui.FilePickerActivity
 import fi.iki.elonen.NanoHTTPD
 import kotlinx.android.synthetic.main.activity_transmitter.*
 import java.io.File
 import java.io.IOException
+import java.lang.System.currentTimeMillis
 import java.util.regex.Pattern
-import fi.iki.elonen.NanoHTTPD
-import kotlinx.android.synthetic.main.activity_main.*
 
 
 class TransmitterActivity : AppCompatActivity() {
 
     var path: String = ""
+    var ipList = mutableListOf<String>()
+    private val latency = 200
 
-    inner class Songserver @Throws(IOException::class) constructor() : NanoHTTPD(63342) {
+    inner class SongServer @Throws(IOException::class) constructor() : NanoHTTPD(63342) {
 
         init {
             start(SOCKET_READ_TIMEOUT, false)
         }
+
         override fun serve(session: IHTTPSession): Response {
-            return newChunkedResponse(Response.Status.OK, ".mp3", readFileAsTextUsingInputStream(path))
+            val params = session.parameters
+            val ip = session.remoteIpAddress
+            if (!ipList.contains(ip) and params.containsKey("Downloaded")) {
+                ipList.add(ip)
+                runOnUiThread{
+                    findViewById<TextView>(R.id.debug_text).text = ip
+                }
+            }
+            return newChunkedResponse(Response.Status.OK, ".mp3", File(path).inputStream())
         }
+
     }
-
-
-    fun readFileAsTextUsingInputStream(fileName: String)
-            = File(fileName).inputStream()
 
     private fun getLocalIpAddress(): String? {
         try {
@@ -66,9 +75,9 @@ class TransmitterActivity : AppCompatActivity() {
 
     }
 
-    fun RunSongServer(view: View) {
+    fun runSongServer() {
         try {
-            Songserver()
+            SongServer()
         } catch (ioe: IOException) {
             System.err.println("Couldn't start server:\n$ioe")
         }
@@ -83,7 +92,7 @@ class TransmitterActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_transmitter)
-        findViewById<TextView>(R.id.ShowIPTextView).setText(getData())
+        findViewById<TextView>(R.id.ShowIPTextView).text = getData()
 
         val thisActivity = this@TransmitterActivity
 
@@ -100,6 +109,7 @@ class TransmitterActivity : AppCompatActivity() {
 
         val showIP = findViewById<TextView>(R.id.ShowIPTextView)
         showIP.text = getLocalIpAddress()
+        changeSong()
         ExitT.setOnClickListener {
             finish()
         }
@@ -112,21 +122,28 @@ class TransmitterActivity : AppCompatActivity() {
     }
 
     fun stopSong(view: View) {
-        // PUT YOUR CODE HERE
+    }
+
+    fun changeSongHandler(view: View) {
+        changeSong()
     }
 
     fun resumeSong(view: View) {
-        Toast.makeText(this, "YES!", Toast.LENGTH_SHORT).show()
-        try {
-            Toast.makeText(this, "Good!", Toast.LENGTH_LONG).show()
-            RunSongServer(view)}
-        catch (ioe: Exception) {
-            System.err.println("Couldn't start server:\n$ioe")
-            Toast.makeText(this, "$ioe", Toast.LENGTH_LONG).show()
+        for (ip in ipList) {
+            val queue = Volley.newRequestQueue(this)
+            val time = currentTimeMillis() + latency
+            val responses = mutableListOf<String>()
+            for (ip in ipList) {
+            val stringRequest = StringRequest(Request.Method.GET, "http://$ip:63343?timeToStart:=$time",
+                Response.Listener<String> { response ->
+                    responses.add(response)
+                },
+                Response.ErrorListener { responses.add("Error") })
+            queue.add(stringRequest)}
         }
-    }
+        }
 
-    fun changeSong(view: View) {
+    fun changeSong() {
         MaterialFilePicker()
             .withActivity(this)
             .withRequestCode(1000)
@@ -134,6 +151,7 @@ class TransmitterActivity : AppCompatActivity() {
             .withFilterDirectories(false) // Set directories filterable (false by default)
             .withHiddenFiles(true) // Show hidden files and folders
             .start()
+        runSongServer()
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
