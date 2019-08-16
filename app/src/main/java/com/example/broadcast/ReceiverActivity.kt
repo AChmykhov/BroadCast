@@ -1,5 +1,6 @@
 package com.example.broadcast
 
+import android.Manifest
 import android.content.pm.PackageManager
 import android.media.MediaPlayer
 import android.net.Uri
@@ -8,12 +9,13 @@ import android.os.Bundle
 import android.os.Environment
 import android.util.Log
 import android.view.View
-import android.view.View.Z
 import android.widget.ImageButton
 import android.widget.SeekBar
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
 import kotlinx.android.synthetic.main.activity_receiver.*
 import java.io.BufferedInputStream
 import java.io.FileOutputStream
@@ -25,7 +27,7 @@ class ReceiverActivity : AppCompatActivity() {
     private var pause = true
 
     companion object {
-        const val IPPort = "IP:Port_of_connection"
+        const val ipPort = "IP:Port_of_connection"
     }
 
     fun getDelay(): Int {
@@ -33,20 +35,22 @@ class ReceiverActivity : AppCompatActivity() {
         return Integer.parseInt(delay.text.toString())
     }
 
+
     fun getData(): String? {
         return intent.getStringExtra(IPPort)
     }
 
-    fun bar() {Z
+    fun bar() {
         var delaybar = findViewById<SeekBar>(R.id.DelayBar)
+
 
         delaybar.setOnSeekBarChangeListener(
             object : SeekBar.OnSeekBarChangeListener {
                 override fun onProgressChanged(seekBar: SeekBar, progress: Int, b: Boolean) {
-                    var delaytext = findViewById<TextView>(R.id.DelayTextView)
+                    val delaytext = findViewById<TextView>(R.id.DelayTextView)
                     val delay: Int = progress - delaybar.max / 2
                     delaytext.setText(delay.toString())
-                    mediaplayer.seekTo(mediaplayer.currentPosition+getDelay())
+                    mediaplayer.seekTo(mediaplayer.currentPosition + getDelay())
                 }
 
                 override fun onStartTrackingTouch(seekBar: SeekBar) {}
@@ -62,6 +66,32 @@ class ReceiverActivity : AppCompatActivity() {
 
         val textview = findViewById<TextView>(R.id.IPPortReceiverTextView)
         textview.setText(getData())
+        val thisActivity = this@ReceiverActivity
+        if (ContextCompat.checkSelfPermission(
+                thisActivity,
+                Manifest.permission.WRITE_EXTERNAL_STORAGE
+            )
+            != PackageManager.PERMISSION_GRANTED
+        ) {
+
+        val urlStr = "http://" + getData() + ":63342/song.mp3"
+        try {
+            DownloadFileFromURL().execute(urlStr)
+        } catch (ioe: Exception) {
+            Toast.makeText(this, "Problem with downloading song \n Exception: $ioe", Toast.LENGTH_LONG).show()
+            finish()
+        }
+            if (!(ActivityCompat.shouldShowRequestPermissionRationale(
+                    thisActivity,
+                    Manifest.permission.WRITE_EXTERNAL_STORAGE
+                ))
+            ) {
+                ActivityCompat.requestPermissions(
+                    thisActivity,
+                    arrayOf(Manifest.permission.WRITE_EXTERNAL_STORAGE), 1
+                )
+            }
+        }
 
         val urlStr = "http://" + getData() + ":63342/song.mp3"
         try {
@@ -81,7 +111,7 @@ class ReceiverActivity : AppCompatActivity() {
         bar()
     }
 
-    fun onPlay(view: View) {
+    fun onPlay(@Suppress("UNUSED_PARAMETER") view: View) {
         if (pause) {
             mediaplayer.start()
             pause = false
@@ -93,7 +123,7 @@ class ReceiverActivity : AppCompatActivity() {
         }
     }
 
-    fun onExit(view: View) {
+    fun onExit(@Suppress("UNUSED_PARAMETER") view: View) {
         close()
     }
 
