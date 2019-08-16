@@ -57,6 +57,7 @@ class TransmitterActivity : AppCompatActivity() {
 
     fun readFileAsTextUsingInputStream(fileName: String) = File(fileName).inputStream()
 
+
     private fun getLocalIpAddress(): String {
         val wifiManager = applicationContext.getSystemService(Context.WIFI_SERVICE) as WifiManager
         if (wifiManager.connectionInfo.ipAddress == 0) {
@@ -85,10 +86,12 @@ class TransmitterActivity : AppCompatActivity() {
 
     }
 
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_transmitter)
         val etqr = getLocalIpAddress()
+
         val thisActivity = this@TransmitterActivity
         if (ContextCompat.checkSelfPermission(
                 thisActivity,
@@ -160,6 +163,7 @@ class TransmitterActivity : AppCompatActivity() {
 
         return ""
 
+
     }
 
     companion object {
@@ -209,6 +213,7 @@ class TransmitterActivity : AppCompatActivity() {
     fun exitFromParty(@Suppress("UNUSED_PARAMETER") view: View) {
         finish()
     }
+
 
     fun stopSong(@Suppress("UNUSED_PARAMETER") view: View) {
         // PUT YOUR CODE HERE
