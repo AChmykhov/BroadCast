@@ -5,17 +5,25 @@ import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.graphics.Bitmap
+import android.media.MediaScannerConnection
 import android.net.wifi.WifiManager
 import android.os.Build
 import android.os.Bundle
+import android.os.Environment
 import android.util.Log
 import android.view.View
+import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import com.google.zxing.BarcodeFormat
+import com.google.zxing.MultiFormatWriter
+import com.google.zxing.WriterException
+import com.google.zxing.common.BitMatrix
 import com.nbsp.materialfilepicker.MaterialFilePicker
 import com.nbsp.materialfilepicker.ui.FilePickerActivity
 import kotlinx.android.synthetic.main.activity_transmitter.*
@@ -24,41 +32,39 @@ import java.io.IOException
 import java.util.regex.Pattern
 import fi.iki.elonen.NanoHTTPD
 import kotlinx.android.synthetic.main.activity_main.*
-
+import java.io.ByteArrayOutputStream
+import java.io.FileOutputStream
+import java.util.*
 
 class TransmitterActivity : AppCompatActivity() {
-
     var path: String = ""
+    internal var bitmap: Bitmap? = null
+    private var showIPQR: ImageView? = null
 
     inner class App @Throws(IOException::class) constructor() : NanoHTTPD(63342) {
 
         init {
-            start(NanoHTTPD.SOCKET_READ_TIMEOUT, false)
+            start(SOCKET_READ_TIMEOUT, false)
         }
 
         @RequiresApi(Build.VERSION_CODES.O)
-        override fun serve(session: IHTTPSession): NanoHTTPD.Response {
+        override fun serve(session: IHTTPSession): Response {
 
-            return NanoHTTPD.newChunkedResponse(Response.Status.OK, ".mp3", readFileAsTextUsingInputStream(path))
+            return newChunkedResponse(Response.Status.OK, ".mp3", readFileAsTextUsingInputStream(path))
         }
 
     }
 
+    fun readFileAsTextUsingInputStream(fileName: String) = File(fileName).inputStream()
 
-    fun readFileAsTextUsingInputStream(fileName: String)
-            = File(fileName).inputStream()
 
-    private fun getLocalIpAddress(): String? {
-        try {
-
-            val wifiManager: WifiManager = getApplicationContext().getSystemService(Context.WIFI_SERVICE) as WifiManager
-            return ipToString(wifiManager.connectionInfo.ipAddress)
+    private fun getLocalIpAddress(): String {
+        val wifiManager = applicationContext.getSystemService(Context.WIFI_SERVICE) as WifiManager
+        if (wifiManager.connectionInfo.ipAddress == 0) {
+            Toast.makeText(this, "No connection to Wi-Fi network", Toast.LENGTH_LONG).show()
+            finish()
         }
-        catch (ex: Exception) {
-            Log.e("IP Address", ex.toString())
-        }
-
-        return null
+        return ipToString(wifiManager.connectionInfo.ipAddress)
     }
 
     private fun ipToString(i: Int): String {
@@ -69,52 +75,147 @@ class TransmitterActivity : AppCompatActivity() {
 
     }
 
-    fun runServ(view: View) {
+    fun runServ(@Suppress("UNUSED_PARAMETER") view: View) {
         try {
             App()
         } catch (ioe: IOException) {
             System.err.println("Couldn't start server:\n$ioe")
+            Toast.makeText(this, "Couldn't start server:\n$ioe", Toast.LENGTH_LONG).show()
+            finish()
         }
 
-    }
-
-    fun getData(): String {
-        return getLocalIpAddress().toString()
     }
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_transmitter)
-        findViewById<TextView>(R.id.ShowIPTextView).setText(getData())
+        val etqr = getLocalIpAddress()
 
         val thisActivity = this@TransmitterActivity
+        if (ContextCompat.checkSelfPermission(
+                thisActivity,
+                Manifest.permission.WRITE_EXTERNAL_STORAGE
+            )
+            != PackageManager.PERMISSION_GRANTED
+        ) {
 
-        if (ContextCompat.checkSelfPermission(thisActivity,
-                Manifest.permission.WRITE_EXTERNAL_STORAGE)
-            != PackageManager.PERMISSION_GRANTED) {
-
-            if (!(ActivityCompat.shouldShowRequestPermissionRationale(thisActivity,
-                    Manifest.permission.WRITE_EXTERNAL_STORAGE))) {
-                ActivityCompat.requestPermissions(thisActivity,
-                    arrayOf(Manifest.permission.WRITE_EXTERNAL_STORAGE), 1)
+            if (!(ActivityCompat.shouldShowRequestPermissionRationale(
+                    thisActivity,
+                    Manifest.permission.WRITE_EXTERNAL_STORAGE
+                ))
+            ) {
+                ActivityCompat.requestPermissions(
+                    thisActivity,
+                    arrayOf(Manifest.permission.WRITE_EXTERNAL_STORAGE), 1
+                )
             }
         }
+        showIPQR = findViewById<ImageView>(R.id.ShowIPQR)
+        if (etqr.trim { it <= ' ' }.isEmpty()) {
+            Toast.makeText(this@TransmitterActivity, "Enter String!", Toast.LENGTH_SHORT).show()
+        } else {
+            try {
+                bitmap = TextToImageEncode(etqr)
+                showIPQR!!.setImageBitmap(bitmap)
+                val path = saveImage(bitmap)  //give read write permission
+                Toast.makeText(this@TransmitterActivity, "QRCode saved to -> $path", Toast.LENGTH_SHORT).show()
+            } catch (e: WriterException) {
+                e.printStackTrace()
+            }
 
-        val showIP = findViewById<TextView>(R.id.ShowIPTextView)
-        showIP.text = getLocalIpAddress()
-        ExitT.setOnClickListener {
-            finish()
         }
+        val showIP = findViewById<TextView>(R.id.showIPTextView)
+        showIP.text = etqr
+    }
+
+    fun saveImage(myBitmap: Bitmap?): String {
+        val bytes = ByteArrayOutputStream()
+        myBitmap!!.compress(Bitmap.CompressFormat.JPEG, 90, bytes)
+        val wallpaperDirectory = File(
+            Environment.getExternalStorageDirectory().toString() + IMAGE_DIRECTORY
+        )
+        if (!wallpaperDirectory.exists()) {
+            Log.d("dirrrrrr", "" + wallpaperDirectory.mkdirs())
+            wallpaperDirectory.mkdirs()
+        }
+
+        try {
+            val f = File(
+                wallpaperDirectory, Calendar.getInstance()
+                    .timeInMillis.toString() + ".jpg"
+            )
+            f.createNewFile()
+            val fo = FileOutputStream(f)
+            fo.write(bytes.toByteArray())
+            MediaScannerConnection.scanFile(
+                this,
+                arrayOf(f.path),
+                arrayOf("image/jpeg"), null
+            )
+            fo.close()
+            Log.d("TAG", "File Saved::--->" + f.absolutePath)
+
+            return f.absolutePath
+        } catch (e1: IOException) {
+            e1.printStackTrace()
+        }
+
+        return ""
+
+
+    }
+
+    companion object {
+
+        val QRcodeWidth = 500
+        private val IMAGE_DIRECTORY = "/QRcodeDemonuts"
+    }
+
+    @Throws(WriterException::class)
+    private fun TextToImageEncode(Value: String): Bitmap? {
+        val bitMatrix: BitMatrix
+        try {
+            bitMatrix = MultiFormatWriter().encode(
+                Value,
+                BarcodeFormat.QR_CODE,
+                QRcodeWidth, QRcodeWidth, null
+            )
+
+        } catch (Illegalargumentexception: IllegalArgumentException) {
+
+            return null
+        }
+
+        val bitMatrixWidth = bitMatrix.getWidth()
+
+        val bitMatrixHeight = bitMatrix.getHeight()
+
+        val pixels = IntArray(bitMatrixWidth * bitMatrixHeight)
+
+        for (y in 0 until bitMatrixHeight) {
+            val offset = y * bitMatrixWidth
+
+            for (x in 0 until bitMatrixWidth) {
+
+                pixels[offset + x] = if (bitMatrix.get(x, y))
+                    resources.getColor(R.color.black)
+                else
+                    resources.getColor(R.color.white)
+            }
+        }
+        val bitmap = Bitmap.createBitmap(bitMatrixWidth, bitMatrixHeight, Bitmap.Config.ARGB_4444)
+
+        bitmap.setPixels(pixels, 0, 500, 0, 0, bitMatrixWidth, bitMatrixHeight)
+        return bitmap
+    }
+
+    fun exitFromParty(@Suppress("UNUSED_PARAMETER") view: View) {
+        finish()
     }
 
 
-
-    fun exitFromParty(view: View) {
-        // PUT YOUR CODE HERE
-    }
-
-    fun stopSong(view: View) {
+    fun stopSong(@Suppress("UNUSED_PARAMETER") view: View) {
         // PUT YOUR CODE HERE
     }
 
@@ -122,14 +223,14 @@ class TransmitterActivity : AppCompatActivity() {
         Toast.makeText(this, "YES!", Toast.LENGTH_SHORT).show()
         try {
             Toast.makeText(this, "Good!", Toast.LENGTH_LONG).show()
-            runServ(view)}
-        catch (ioe: Exception) {
+            runServ(view)
+        } catch (ioe: Exception) {
             System.err.println("Couldn't start server:\n$ioe")
             Toast.makeText(this, "$ioe", Toast.LENGTH_LONG).show()
         }
     }
 
-    fun changeSong(view: View) {
+    fun changeSong(@Suppress("UNUSED_PARAMETER") view: View) {
         MaterialFilePicker()
             .withActivity(this)
             .withRequestCode(1000)
@@ -140,11 +241,16 @@ class TransmitterActivity : AppCompatActivity() {
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        super.onActivityResult(requestCode, resultCode, data)
+        val resultPath = data?.getStringExtra(FilePickerActivity.RESULT_FILE_PATH)
+        if (resultPath == null) {
+            Toast.makeText(this, "Problem with file path parsing", Toast.LENGTH_LONG).show()
+        } else {
+            super.onActivityResult(requestCode, resultCode, data)
 
-        if (requestCode == 1000 && resultCode == Activity.RESULT_OK) {
-            val filePath = data!!.getStringExtra(FilePickerActivity.RESULT_FILE_PATH)
-            path = filePath
+
+            if (requestCode == 1000 && resultCode == Activity.RESULT_OK) {
+                path = resultPath
+            }
         }
     }
 
@@ -160,4 +266,5 @@ class TransmitterActivity : AppCompatActivity() {
             }
         }
     }
+
 }
