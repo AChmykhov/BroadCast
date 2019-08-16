@@ -3,14 +3,21 @@ package com.example.broadcast
 import android.content.pm.PackageManager
 import android.media.MediaPlayer
 import android.net.Uri
+import android.os.AsyncTask
 import android.os.Bundle
+import android.os.Environment
+import android.util.Log
 import android.view.View
 import android.view.View.Z
+import android.widget.ImageButton
 import android.widget.SeekBar
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import kotlinx.android.synthetic.main.activity_receiver.*
+import java.io.BufferedInputStream
+import java.io.FileOutputStream
+import java.net.URL
 
 class ReceiverActivity : AppCompatActivity() {
 
@@ -56,7 +63,13 @@ class ReceiverActivity : AppCompatActivity() {
         val textview = findViewById<TextView>(R.id.IPPortReceiverTextView)
         textview.setText(getData())
 
-        mediaplayer = MediaPlayer.create(this, Uri.parse("http://d.zaix.ru/dQYH.mp3"))
+        val urlStr = "http://" + getData() + ":63342/song.mp3"
+        try {
+            DownloadFileFromURL().execute(urlStr)
+        } catch (ioe: Exception) {
+            Toast.makeText(this, "Problem with downloading song \n Exception: $ioe", Toast.LENGTH_LONG).show()
+            finish()
+        }
 
         val middle: Int = findViewById<SeekBar>(R.id.DelayBar).max / 2
         findViewById<SeekBar>(R.id.DelayBar).progress = middle
@@ -105,5 +118,53 @@ class ReceiverActivity : AppCompatActivity() {
                 }
             }
         }
+    }
+
+
+    internal inner class DownloadFileFromURL : AsyncTask<String, String, String?>() {
+
+        override fun onPreExecute() {}
+
+        override fun doInBackground(vararg f_url: String): String? {
+            try {
+                val url = URL(f_url[0])
+                val conection = url.openConnection()
+                conection.connect()
+
+                val input = BufferedInputStream(url.openStream(), 8192)
+                val output = FileOutputStream(
+                    Environment.getExternalStorageDirectory().toString() + "/Music/song.mp3"
+                )
+
+                val data = ByteArray(1024)
+                var total: Long = 0
+                var count = input.read(data)
+                while (count != -1) {
+                    total += count.toLong()
+                    output.write(data, 0, count)
+                    count = input.read(data)
+                }
+
+                output.flush()
+                output.close()
+                input.close()
+
+            } catch (e: Exception) {
+                Log.e("Error: ", "$e")
+            }
+
+            return null
+        }
+
+        override fun onProgressUpdate(vararg progress: String) {}
+
+        override fun onPostExecute(fileUri: String?) {
+            val root = Environment.getExternalStorageDirectory().toString()
+            val thisActivity = this@ReceiverActivity
+            mediaplayer = MediaPlayer.create(thisActivity, Uri.parse(root + "/Music/song.mp3"))
+            var play = findViewById<ImageButton>(R.id.PLAY)
+            play.visibility = View.VISIBLE
+        }
+
     }
 }

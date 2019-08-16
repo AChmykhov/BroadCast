@@ -1,36 +1,29 @@
 package com.example.broadcast
 
 import android.Manifest
-import android.app.Activity
 import android.content.Context
-import android.content.Intent
 import android.content.pm.PackageManager
 import android.net.wifi.WifiManager
 import android.os.Bundle
 import android.provider.MediaStore
 import android.util.Log
 import android.view.View
-import android.widget.ArrayAdapter
 import android.widget.ListView
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
-import com.nbsp.materialfilepicker.MaterialFilePicker
-import com.nbsp.materialfilepicker.ui.FilePickerActivity
 import fi.iki.elonen.NanoHTTPD
 import kotlinx.android.synthetic.main.activity_transmitter.*
 import java.io.File
 import java.io.IOException
-import java.util.regex.Pattern
 
 
 class TransmitterActivity : AppCompatActivity() {
 
     var path: String = ""
-    var musicArray = emptyArray<String>()
-    var locationArray = emptyArray<String>()
+    var adapter = MusicListAdapter(this)
 
     inner class App @Throws(IOException::class) constructor() : NanoHTTPD(63342) {
 
@@ -68,7 +61,8 @@ class TransmitterActivity : AppCompatActivity() {
 
     }
 
-    fun runServ(view: View) {
+    public fun runServ(view: View, _path: String) {
+        path = _path
         try {
             App()
         } catch (ioe: IOException) {
@@ -120,21 +114,21 @@ class TransmitterActivity : AppCompatActivity() {
     fun createMusicList() {
         var musicList = findViewById<ListView>(R.id.MusicList)
         getMusic()
-        var adapter = ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, musicArray)
         musicList.adapter = adapter
 
         musicList.setOnItemClickListener { parent, view, position, id ->
-            path = locationArray[position]
+            path = adapter.objects[position].location
             Toast.makeText(this, "YES!", Toast.LENGTH_SHORT).show()
             try {
                 Toast.makeText(this, "Good!", Toast.LENGTH_LONG).show()
-                runServ(view)
+                runServ(view, path)
             } catch (ioe: Exception) {
                 System.err.println("Couldn't start server:\n$ioe")
                 Toast.makeText(this, "$ioe", Toast.LENGTH_LONG).show()
             }
         }
     }
+
 
     fun getMusic() {
         var contecntResolver = getContentResolver()
@@ -150,48 +144,8 @@ class TransmitterActivity : AppCompatActivity() {
                 val currentTitle = songCursor.getString(songTitle)
                 val currentArtist = songCursor.getString(songArtist)
                 val currentLocation = songCursor.getString(songLocation)
-                musicArray += "Title: " + currentTitle + "\n\n" +
-                        "Artist: " + currentArtist
-                locationArray += currentLocation
+                adapter.addItem(currentTitle, currentArtist, currentLocation, ::runServ)
             } while (songCursor.moveToNext())
-        }
-    }
-
-    fun exitFromParty(view: View) {
-        // PUT YOUR CODE HERE
-    }
-
-    fun stopSong(view: View) {
-        // PUT YOUR CODE HERE
-    }
-
-    fun resumeSong(view: View) {
-        Toast.makeText(this, "YES!", Toast.LENGTH_SHORT).show()
-        try {
-            Toast.makeText(this, "Good!", Toast.LENGTH_LONG).show()
-            runServ(view)
-        } catch (ioe: Exception) {
-            System.err.println("Couldn't start server:\n$ioe")
-            Toast.makeText(this, "$ioe", Toast.LENGTH_LONG).show()
-        }
-    }
-
-    fun changeSong(view: View) {
-        MaterialFilePicker()
-            .withActivity(this)
-            .withRequestCode(1000)
-            .withFilter(Pattern.compile(".*\\.mp3$")) // Filtering files and directories by file name using regexp
-            .withFilterDirectories(false) // Set directories filterable (false by default)
-            .withHiddenFiles(true) // Show hidden files and folders
-            .start()
-    }
-
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        super.onActivityResult(requestCode, resultCode, data)
-
-        if (requestCode == 1000 && resultCode == Activity.RESULT_OK) {
-            val filePath = data!!.getStringExtra(FilePickerActivity.RESULT_FILE_PATH)
-            path = filePath
         }
     }
 

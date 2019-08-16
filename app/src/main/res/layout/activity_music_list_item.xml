@@ -8,7 +8,9 @@
         tools:context=".MusicListItem">
 
     <com.daimajia.swipe.SwipeLayout
-            android:layout_width="match_parent" android:layout_height="80dp" android:id="@+id/swipeMusicItem">
+            android:layout_width="0dp" android:layout_height="80dp" android:id="@+id/swipeMusicItem"
+            app:layout_constraintTop_toTopOf="parent" app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent">
         <!-- Bottom View Start-->
         <LinearLayout
                 android:background="#66ddff00"
@@ -34,7 +36,7 @@
             <TextView
                     android:text="TextView"
                     android:layout_width="wrap_content"
-                    android:layout_height="wrap_content" android:id="@+id/titleTxtView" android:layout_weight="1"
+                    android:layout_height="wrap_content" android:id="@+id/titleTextView" android:layout_weight="1"
                     android:textSize="20sp" android:fontFamily="sans-serif"/>
             <TextView
                     android:text="TextView"
