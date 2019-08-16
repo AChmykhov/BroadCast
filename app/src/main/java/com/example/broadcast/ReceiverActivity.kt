@@ -37,9 +37,10 @@ class ReceiverActivity : AppCompatActivity() {
 
         override fun serve(session: IHTTPSession): Response {
             val params = session.parameters
+            runOnUiThread {Toast.makeText(this@ReceiverActivity, "Resume signal received", Toast.LENGTH_SHORT).show()}
             if (params.containsKey("startToPlay")) {
                 params["startToPlay"]?.get(0)?.let { startPlaying(it) }
-                runOnUiThread {Toast.makeText(this@ReceiverActivity, "Resume signal received", Toast.LENGTH_SHORT).show()}
+                runOnUiThread {Toast.makeText(this@ReceiverActivity, "Parameter in ", Toast.LENGTH_SHORT).show()}
             }
             return newFixedLengthResponse("Hello World!")
         }
