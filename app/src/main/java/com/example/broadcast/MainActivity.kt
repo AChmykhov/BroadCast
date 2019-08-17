@@ -1,13 +1,17 @@
 package com.example.broadcast
 
+import android.Manifest
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.net.wifi.WifiManager
 import android.os.Bundle
 import android.view.View
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
 import com.google.android.material.textfield.TextInputEditText
 
 class MainActivity : AppCompatActivity() {
@@ -16,6 +20,27 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+
+        val thisActivity = this@MainActivity
+
+        if (ContextCompat.checkSelfPermission(
+                thisActivity,
+                Manifest.permission.WRITE_EXTERNAL_STORAGE
+            )
+            != PackageManager.PERMISSION_GRANTED
+        ) {
+
+            if (!(ActivityCompat.shouldShowRequestPermissionRationale(
+                    thisActivity,
+                    Manifest.permission.WRITE_EXTERNAL_STORAGE
+                ))
+            ) {
+                ActivityCompat.requestPermissions(
+                    thisActivity,
+                    arrayOf(Manifest.permission.WRITE_EXTERNAL_STORAGE), 1
+                )
+            }
+        }
     }
 
     fun scanQR(@Suppress("UNUSED_PARAMETER") view: View) {
@@ -54,10 +79,9 @@ class MainActivity : AppCompatActivity() {
                 Toast.makeText(this, "No connection to Wi-Fi network", Toast.LENGTH_LONG).show()
             } else {
                 val receiverIntent = Intent(this, ReceiverActivity::class.java)
-                receiverIntent.putExtra(ReceiverActivity.IPPort, data.text.toString())
+                receiverIntent.putExtra(ReceiverActivity.ipPort, data.text.toString())
                 startActivity(receiverIntent)
             }
         }
     }
-
 }
