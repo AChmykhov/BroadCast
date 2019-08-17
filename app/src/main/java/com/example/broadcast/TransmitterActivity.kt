@@ -296,8 +296,8 @@ class TransmitterActivity : AppCompatActivity() {
                 val time = currentTimeMillis() + latency
                 timeToStart = time
                 val stringRequest = StringRequest(Request.Method.GET, "http://$ip:63343/?timeToStart=$time",
-                    Response.Listener<String> {response -> runOnUiThread {Toast.makeText(this, "$response ot $ip", Toast.LENGTH_LONG).show()}},
-                    Response.ErrorListener {error -> runOnUiThread {Toast.makeText(this, error.toString(), Toast.LENGTH_SHORT).show()}})
+                    Response.Listener<String> {response -> runOnUiThread {Toast.makeText(this, "$response from $ip", Toast.LENGTH_LONG).show()}},
+                    Response.ErrorListener {error -> runOnUiThread {Toast.makeText(this, error.toString(), Toast.LENGTH_LONG).show()}})
                 queue.add(stringRequest)
                     }
             songRun = true

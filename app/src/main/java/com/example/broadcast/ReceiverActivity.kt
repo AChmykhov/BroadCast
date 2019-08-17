@@ -32,6 +32,7 @@ class ReceiverActivity : AppCompatActivity() {
 
     private var mediaplayer = MediaPlayer()
     private var muted = false
+    private var pause = false
 
     inner class receiverServer @Throws(IOException::class) constructor() : NanoHTTPD(63343) {
 
@@ -46,6 +47,9 @@ class ReceiverActivity : AppCompatActivity() {
             if (params.containsKey("timeToStart")) {
                 params["timeToStart"]?.get(0)?.let { startPlaying(it) }
             }
+            if (params.containsKey("timeToStop")) {
+                params["timeToStop"]?.get(0)?.let { startPlaying(it) }
+            }
             return newFixedLengthResponse("Hello World!")
         }
 
@@ -59,8 +63,13 @@ class ReceiverActivity : AppCompatActivity() {
         runOnUiThread {Toast.makeText(this, "Resume signal understood", Toast.LENGTH_SHORT).show()}
         val time = System.currentTimeMillis()
         Thread.sleep(Time.toLong() - time)
-        mediaplayer.start()
-        muted = false
+        if (pause) {
+            mediaplayer.start()
+            pause = false
+        } else {
+            mediaplayer.pause()
+            pause = true
+        }
     }
 
     fun getDelay(): Int {
