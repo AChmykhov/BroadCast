@@ -24,9 +24,6 @@ import fi.iki.elonen.NanoHTTPD
 import kotlinx.android.synthetic.main.activity_receiver.*
 import java.io.BufferedInputStream
 import java.io.FileOutputStream
-import java.net.URL
-import java.io.BufferedInputStream
-import java.io.FileOutputStream
 import java.io.IOException
 import java.net.URL
 

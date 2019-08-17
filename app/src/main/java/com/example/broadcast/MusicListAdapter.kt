@@ -11,12 +11,10 @@ import android.widget.TextView
 class MusicListAdapter : BaseAdapter {
 
     var objects = emptyArray<MusicListItem>()
-    var handler = fun(view: View, path: String) {}
     var LInflater: LayoutInflater
 
 
-    constructor(mContext: Context, func: (view: View, path: String) -> Unit) {
-
+    constructor(mContext: Context) {
         LInflater = mContext.getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater
     }
 
