@@ -51,7 +51,7 @@ class TransmitterActivity : AppCompatActivity() {
     inner class SongServer @Throws(IOException::class) constructor() : NanoHTTPD(63342) {
 
         init {
-            start(SOCKET_READ_TIMEOUT, false)
+            this.start(SOCKET_READ_TIMEOUT, false)
         }
 
         override fun serve(session: IHTTPSession): Response {
@@ -64,6 +64,9 @@ class TransmitterActivity : AppCompatActivity() {
                 }
             }
             return newChunkedResponse(Response.Status.OK, ".mp3", File(path).inputStream())
+        }
+        fun stpServer(){
+            this.stop()
         }
 
     }
@@ -174,7 +177,9 @@ class TransmitterActivity : AppCompatActivity() {
         showIP.text = getLocalIpAddress()
         changeSong()
         ExitT.setOnClickListener {
+            SongServer().stpServer()
             finish()
+            runOnUiThread { Toast.makeText(this, "closed", Toast.LENGTH_SHORT).show() }
         }
     }
 
@@ -311,7 +316,6 @@ class TransmitterActivity : AppCompatActivity() {
             .start()
             */
         createMusicList()
-        runSongServer(path)
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
@@ -331,6 +335,9 @@ class TransmitterActivity : AppCompatActivity() {
             FILE_SYSTEM_REQUEST -> {
                 if (resultCode == Activity.RESULT_OK) {
                     path = data!!.getStringExtra("path")!!
+                    runOnUiThread { Toast.makeText(this, "The $path", Toast.LENGTH_SHORT).show() }
+                    runSongServer(path)
+                    runOnUiThread { Toast.makeText(this, "Server run", Toast.LENGTH_SHORT).show() }
                 }
             }
         }
