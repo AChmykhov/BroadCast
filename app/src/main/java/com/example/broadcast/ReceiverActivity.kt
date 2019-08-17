@@ -32,7 +32,7 @@ class ReceiverActivity : AppCompatActivity() {
 
     private var mediaplayer = MediaPlayer()
     private var muted = false
-    private var pause = false
+    private var pause = true
 
     inner class receiverServer @Throws(IOException::class) constructor() : NanoHTTPD(63343) {
 

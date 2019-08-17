@@ -290,7 +290,6 @@ class TransmitterActivity : AppCompatActivity() {
 
     fun resumeSong(view: View) {
         if (!songRun){
-            mediaplayer.start()
             for (ip in ipList) {
                 val queue = Volley.newRequestQueue(this)
                 val time = currentTimeMillis() + latency
@@ -301,9 +300,11 @@ class TransmitterActivity : AppCompatActivity() {
                 queue.add(stringRequest)
                     }
             songRun = true
+            val timeCurrent = currentTimeMillis()
+            Thread.sleep(timeToStart - timeCurrent)
+            mediaplayer.start()
             }
         else {
-            mediaplayer.stop()
             for (ip in ipList) {
                 val queue = Volley.newRequestQueue(this)
                 val time = currentTimeMillis() + latency
@@ -314,6 +315,9 @@ class TransmitterActivity : AppCompatActivity() {
                 queue.add(stringRequest)
                     }
             songRun = false
+            val timeCurrent = currentTimeMillis()
+            Thread.sleep(timeToStart - timeCurrent)
+            mediaplayer.stop()
             }
         }
 
