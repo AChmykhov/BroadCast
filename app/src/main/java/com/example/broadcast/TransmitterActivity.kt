@@ -320,11 +320,12 @@ class TransmitterActivity : AppCompatActivity() {
             }
         else {
             for (ip in ipList) {
+                runOnUiThread {Toast.makeText(this, "Current $songRun", Toast.LENGTH_LONG).show()}
                 val queue = Volley.newRequestQueue(this)
                 val time = currentTimeMillis() + latency
                 timeToStop = time
                 val stringRequest = StringRequest(Request.Method.GET, "http://$ip:63343/?timeToStop=$time",
-                    Response.Listener<String> {response -> runOnUiThread {Toast.makeText(this, "$response ot $ip", Toast.LENGTH_LONG).show()}},
+                    Response.Listener<String> {response -> runOnUiThread {Toast.makeText(this, "$response from $ip", Toast.LENGTH_LONG).show()}},
                     Response.ErrorListener {error -> runOnUiThread {Toast.makeText(this, error.toString(), Toast.LENGTH_SHORT).show()}})
                 queue.add(stringRequest)
                     }
