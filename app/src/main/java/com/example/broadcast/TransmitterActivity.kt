@@ -191,6 +191,7 @@ class TransmitterActivity : AppCompatActivity() {
         ExitT.setOnClickListener {
             SongServer().stpServer()
             finish()
+
             runOnUiThread { Toast.makeText(this, "closed", Toast.LENGTH_SHORT).show() }
         }
     }
@@ -287,6 +288,19 @@ class TransmitterActivity : AppCompatActivity() {
     fun changeSongHandler(view: View) {
         changeSong()
     }
+    fun sendRequest(req: String){
+        for (ip in ipList) {
+            val queue = Volley.newRequestQueue(this)
+            val time = currentTimeMillis() + latency
+            timeToStart = time
+            val stringRequest = StringRequest(Request.Method.GET, "http://$ip:63343/?timeToStart=$time",
+                Response.Listener<String> {response -> runOnUiThread {Toast.makeText(this, "$response ot $ip", Toast.LENGTH_LONG).show()}},
+                Response.ErrorListener {error -> runOnUiThread {Toast.makeText(this, error.toString(), Toast.LENGTH_SHORT).show()}})
+            queue.add(stringRequest)
+        }
+        songRun = true
+    }
+
 
     fun resumeSong(view: View) {
         if (!songRun){

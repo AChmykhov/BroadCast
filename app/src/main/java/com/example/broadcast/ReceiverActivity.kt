@@ -39,6 +39,9 @@ class ReceiverActivity : AppCompatActivity() {
         init {
             start(SOCKET_READ_TIMEOUT, false)
         }
+        fun stpServer() {
+            this.stop()
+        }
 
         override fun serve(session: IHTTPSession): Response {
             val params = session.parameters
@@ -172,10 +175,12 @@ class ReceiverActivity : AppCompatActivity() {
     }
 
     fun onExit(@Suppress("UNUSED_PARAMETER") view: View) {
+        receiverServer().stpServer()
         close()
     }
 
     override fun onBackPressed() {
+        receiverServer().stpServer()
         close()
         super.onBackPressed()
     } 
