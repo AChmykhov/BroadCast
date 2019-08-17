@@ -288,52 +288,40 @@ class TransmitterActivity : AppCompatActivity() {
     fun changeSongHandler(view: View) {
         changeSong()
     }
-    fun sendRequest(req: String){
+
+    fun sendRequestToAll(req: String){
         for (ip in ipList) {
-            val queue = Volley.newRequestQueue(this)
-            val time = currentTimeMillis() + latency
-            timeToStart = time
-            val stringRequest = StringRequest(Request.Method.GET, "http://$ip:63343/?timeToStart=$time",
-                Response.Listener<String> {response -> runOnUiThread {Toast.makeText(this, "$response ot $ip", Toast.LENGTH_LONG).show()}},
-                Response.ErrorListener {error -> runOnUiThread {Toast.makeText(this, error.toString(), Toast.LENGTH_SHORT).show()}})
-            queue.add(stringRequest)
+            sendRequestToIP(ip, req)
         }
-        songRun = true
     }
 
+    fun sendRequestToIP(req: String, ip: String){
+        val queue = Volley.newRequestQueue(this)
+        val stringRequest = StringRequest(Request.Method.GET, "http://$ip:63343/?$req",
+            Response.Listener<String> {response -> runOnUiThread {Toast.makeText(this, "$response from $ip", Toast.LENGTH_LONG).show()}},
+            Response.ErrorListener {error -> runOnUiThread {Toast.makeText(this, error.toString(), Toast.LENGTH_SHORT).show()}})
+        queue.add(stringRequest)
+    }
 
     fun resumeSong(view: View) {
         if (!songRun){
-            for (ip in ipList) {
-                val queue = Volley.newRequestQueue(this)
-                val time = currentTimeMillis() + latency
-                timeToStart = time
-                val stringRequest = StringRequest(Request.Method.GET, "http://$ip:63343/?timeToStart=$time",
-                    Response.Listener<String> {response -> runOnUiThread {Toast.makeText(this, "$response from $ip", Toast.LENGTH_LONG).show()}},
-                    Response.ErrorListener {error -> runOnUiThread {Toast.makeText(this, error.toString(), Toast.LENGTH_LONG).show()}})
-                queue.add(stringRequest)
-                    }
+            val time = currentTimeMillis() + latency
+            timeToStart = time
+            sendRequestToAll("timeToStart=$time")
             songRun = true
             val timeCurrent = currentTimeMillis()
             Thread.sleep(timeToStart - timeCurrent)
             mediaplayer.start()
             }
         else {
-            for (ip in ipList) {
-                runOnUiThread {Toast.makeText(this, "Current $songRun", Toast.LENGTH_LONG).show()}
-                val queue = Volley.newRequestQueue(this)
-                val time = currentTimeMillis() + latency
-                timeToStop = time
-                val stringRequest = StringRequest(Request.Method.GET, "http://$ip:63343/?timeToStop=$time",
-                    Response.Listener<String> {response -> runOnUiThread {Toast.makeText(this, "$response from $ip", Toast.LENGTH_LONG).show()}},
-                    Response.ErrorListener {error -> runOnUiThread {Toast.makeText(this, error.toString(), Toast.LENGTH_SHORT).show()}})
-                queue.add(stringRequest)
-                    }
+
+            val time = currentTimeMillis() + latency
+            timeToStop = time
+            sendRequestToAll("timeToStop=$time")
             songRun = false
             val timeCurrent = currentTimeMillis()
             Thread.sleep(timeToStart - timeCurrent)
-            mediaplayer.stop()
-            }
+            mediaplayer.pause()}
         }
 
     fun changeSong() {
