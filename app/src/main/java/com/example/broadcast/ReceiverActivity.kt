@@ -16,18 +16,52 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import com.android.volley.Request
+import com.android.volley.Response
+import com.android.volley.toolbox.StringRequest
+import com.android.volley.toolbox.Volley
+import fi.iki.elonen.NanoHTTPD
 import kotlinx.android.synthetic.main.activity_receiver.*
 import java.io.BufferedInputStream
 import java.io.FileOutputStream
+import java.io.IOException
 import java.net.URL
+
 
 class ReceiverActivity : AppCompatActivity() {
 
     private var mediaplayer = MediaPlayer()
     private var pause = true
 
+    inner class receiverServer @Throws(IOException::class) constructor() : NanoHTTPD(63343) {
+
+        init {
+            start(SOCKET_READ_TIMEOUT, false)
+        }
+
+        override fun serve(session: IHTTPSession): Response {
+            val params = session.parameters
+            runOnUiThread {Toast.makeText(this@ReceiverActivity, "Resume signal received", Toast.LENGTH_SHORT).show()}
+            runOnUiThread {Toast.makeText(this@ReceiverActivity, params.toString(), Toast.LENGTH_SHORT).show()}
+            if (params.containsKey("timeToStart")) {
+                runOnUiThread {Toast.makeText(this@ReceiverActivity, params["timeToStart"].toString(), Toast.LENGTH_SHORT).show()}
+                params["timeToStart"]?.get(0)?.let { startPlaying(it) }
+                runOnUiThread {Toast.makeText(this@ReceiverActivity, "Parameter in ", Toast.LENGTH_SHORT).show()}
+            }
+            return newFixedLengthResponse("Hello World!")
+        }
+
+    }
+
     companion object {
         const val ipPort = "IP:Port_of_connection"
+    }
+
+    fun startPlaying(Time: String) {
+        runOnUiThread {Toast.makeText(this, "Resume signal understood", Toast.LENGTH_SHORT).show()}
+        val time = System.currentTimeMillis()
+        mediaplayer.seekTo((Time.toLong() - time).toInt())
+        mediaplayer.start()
     }
 
     fun getDelay(): Int {
@@ -35,14 +69,17 @@ class ReceiverActivity : AppCompatActivity() {
         return Integer.parseInt(delay.text.toString())
     }
 
-
     fun getData(): String? {
         return intent.getStringExtra(ipPort)
     }
 
-    fun bar() {
-        var delaybar = findViewById<SeekBar>(R.id.DelayBar)
+    fun runServer() {
+        receiverServer()
+    }
 
+    fun bar() {
+
+        var delaybar = findViewById<SeekBar>(R.id.DelayBar)
 
         delaybar.setOnSeekBarChangeListener(
             object : SeekBar.OnSeekBarChangeListener {
@@ -84,8 +121,8 @@ class ReceiverActivity : AppCompatActivity() {
                 )
             }
         }
-
-        val urlStr = "http://" + getData() + ":63342/song.mp3"
+        val ip = getData()
+        val urlStr = "http://$ip:63342/song.mp3"
         try {
             DownloadFileFromURL().execute(urlStr)
         } catch (ioe: Exception) {
@@ -93,13 +130,24 @@ class ReceiverActivity : AppCompatActivity() {
             finish()
         }
 
+        val queue = Volley.newRequestQueue(this)
+        var Response_to_request = ""
+        val stringRequest = StringRequest(
+            Request.Method.GET, "http://$ip:63342?Downloaded=true",
+            Response.Listener<String> { response ->
+                Response_to_request = response
+            },
+            Response.ErrorListener {Response_to_request = "Error" })
+        queue.add(stringRequest)
+
         val middle: Int = findViewById<SeekBar>(R.id.DelayBar).max / 2
         findViewById<SeekBar>(R.id.DelayBar).progress = middle
         val min = findViewById<TextView>(R.id.MinimumTextView)
         min.setText((-middle).toString())
         val max = findViewById<TextView>(R.id.MaximumTextView)
         max.setText(middle.toString())
-
+        runServer()
+        Toast.makeText(this, "Server run", Toast.LENGTH_SHORT).show()
         bar()
     }
 
@@ -122,7 +170,7 @@ class ReceiverActivity : AppCompatActivity() {
     override fun onBackPressed() {
         close()
         super.onBackPressed()
-    }
+    } 
 
     fun close() {
         mediaplayer.stop()
