@@ -90,7 +90,7 @@
             app:layout_constraintStart_toStartOf="parent" android:layout_marginStart="176dp"
             app:layout_constraintVertical_bias="0.434" android:layout_marginEnd="8dp"
             app:layout_constraintEnd_toEndOf="parent" app:layout_constraintHorizontal_bias="0.005"
-            android:onClick="onPlay" android:contentDescription="@string/todo"/>
+            android:onClick="onPlay" android:contentDescription="@string/todo" android:visibility="invisible"/>
     <TextView
             android:text="TextView"
             android:layout_width="wrap_content"

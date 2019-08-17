@@ -1,5 +1,6 @@
 package com.example.broadcast
 
+import android.Manifest
 import android.content.pm.PackageManager
 import android.media.MediaPlayer
 import android.net.Uri
@@ -8,10 +9,13 @@ import android.os.Bundle
 import android.os.Environment
 import android.util.Log
 import android.view.View
+import android.widget.ImageButton
 import android.widget.SeekBar
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
 import com.android.volley.Request
 import com.android.volley.Response
 import com.android.volley.toolbox.StringRequest
@@ -50,7 +54,7 @@ class ReceiverActivity : AppCompatActivity() {
     }
 
     companion object {
-        const val IPPort = "IP:Port_of_connection"
+        const val ipPort = "IP:Port_of_connection"
     }
 
     fun startPlaying(Time: String) {
@@ -66,7 +70,7 @@ class ReceiverActivity : AppCompatActivity() {
     }
 
     fun getData(): String? {
-        return intent.getStringExtra(IPPort)
+        return intent.getStringExtra(ipPort)
     }
 
     fun runServer() {
@@ -80,10 +84,10 @@ class ReceiverActivity : AppCompatActivity() {
         delaybar.setOnSeekBarChangeListener(
             object : SeekBar.OnSeekBarChangeListener {
                 override fun onProgressChanged(seekBar: SeekBar, progress: Int, b: Boolean) {
-                    var delaytext = findViewById<TextView>(R.id.DelayTextView)
+                    val delaytext = findViewById<TextView>(R.id.DelayTextView)
                     val delay: Int = progress - delaybar.max / 2
                     delaytext.setText(delay.toString())
-                    mediaplayer.seekTo(mediaplayer.currentPosition+getDelay())
+                    mediaplayer.seekTo(mediaplayer.currentPosition + getDelay())
                 }
 
                 override fun onStartTrackingTouch(seekBar: SeekBar) {}
@@ -99,6 +103,24 @@ class ReceiverActivity : AppCompatActivity() {
 
         val textview = findViewById<TextView>(R.id.IPPortReceiverTextView)
         textview.setText(getData())
+        val thisActivity = this@ReceiverActivity
+        if (ContextCompat.checkSelfPermission(
+                thisActivity,
+                Manifest.permission.WRITE_EXTERNAL_STORAGE
+            )
+            != PackageManager.PERMISSION_GRANTED
+        ) {
+            if (!(ActivityCompat.shouldShowRequestPermissionRationale(
+                    thisActivity,
+                    Manifest.permission.WRITE_EXTERNAL_STORAGE
+                ))
+            ) {
+                ActivityCompat.requestPermissions(
+                    thisActivity,
+                    arrayOf(Manifest.permission.WRITE_EXTERNAL_STORAGE), 1
+                )
+            }
+        }
         val ip = getData()
         val urlStr = "http://$ip:63342/song.mp3"
         try {
@@ -129,7 +151,7 @@ class ReceiverActivity : AppCompatActivity() {
         bar()
     }
 
-    fun onPlay(view: View) {
+    fun onPlay(@Suppress("UNUSED_PARAMETER") view: View) {
         if (pause) {
             mediaplayer.start()
             pause = false
@@ -141,14 +163,14 @@ class ReceiverActivity : AppCompatActivity() {
         }
     }
 
-    fun onExit(view: View) {
+    fun onExit(@Suppress("UNUSED_PARAMETER") view: View) {
         close()
     }
 
     override fun onBackPressed() {
         close()
         super.onBackPressed()
-    }
+    } 
 
     fun close() {
         mediaplayer.stop()
@@ -167,7 +189,6 @@ class ReceiverActivity : AppCompatActivity() {
             }
         }
     }
-
 
 
     internal inner class DownloadFileFromURL : AsyncTask<String, String, String?>() {
@@ -211,6 +232,8 @@ class ReceiverActivity : AppCompatActivity() {
             val root = Environment.getExternalStorageDirectory().toString()
             val thisActivity = this@ReceiverActivity
             mediaplayer = MediaPlayer.create(thisActivity, Uri.parse(root + "/Music/song.mp3"))
+            var play = findViewById<ImageButton>(R.id.PLAY)
+            play.visibility = View.VISIBLE
         }
 
     }
