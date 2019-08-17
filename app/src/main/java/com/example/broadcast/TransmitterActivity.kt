@@ -6,7 +6,9 @@ import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
+import android.media.MediaPlayer
 import android.media.MediaScannerConnection
+import android.net.Uri
 import android.net.wifi.WifiManager
 import android.os.Bundle
 import android.os.Environment
@@ -50,6 +52,9 @@ class TransmitterActivity : AppCompatActivity() {
     private var showIPQR: ImageView? = null
     lateinit var adapter: MusicListAdapter
     val FILE_SYSTEM_REQUEST = 100
+    private var mediaplayer = MediaPlayer()
+    private var pause = true
+
 
     inner class SongServer @Throws(IOException::class) constructor() : NanoHTTPD(63342) {
 
@@ -284,6 +289,7 @@ class TransmitterActivity : AppCompatActivity() {
     }
 
     fun resumeSong(view: View) {
+        mediaplayer.start()
         if (!songRun){
             for (ip in ipList) {
                 val queue = Volley.newRequestQueue(this)
@@ -343,6 +349,7 @@ class TransmitterActivity : AppCompatActivity() {
                     runOnUiThread { Toast.makeText(this, "The $path", Toast.LENGTH_SHORT).show() }
                     runSongServer(path)
                     runOnUiThread { Toast.makeText(this, "Server run", Toast.LENGTH_SHORT).show() }
+                    mediaplayer = MediaPlayer.create(this, Uri.parse(path))
                 }
             }
         }

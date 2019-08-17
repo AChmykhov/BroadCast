@@ -61,7 +61,7 @@
                 android:layout_height="wrap_content"
                 android:id="@+id/DelayBar"
                 android:progress="100"
-                android:max="20000"
+                android:max="200"
                 android:progressTint="@color/colorBar"
                 android:background="@color/colorReceiverBackground"
                 android:progressBackgroundTint="@color/colorBar"/>
