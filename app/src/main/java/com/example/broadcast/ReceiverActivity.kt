@@ -31,7 +31,7 @@ import java.net.URL
 class ReceiverActivity : AppCompatActivity() {
 
     private var mediaplayer = MediaPlayer()
-    private var pause = true
+    private var muted = false
 
     inner class receiverServer @Throws(IOException::class) constructor() : NanoHTTPD(63343) {
 
@@ -60,7 +60,7 @@ class ReceiverActivity : AppCompatActivity() {
         val time = System.currentTimeMillis()
         Thread.sleep(Time.toLong() - time)
         mediaplayer.start()
-        pause = false
+        muted = false
     }
 
     fun getDelay(): Int {
@@ -150,15 +150,15 @@ class ReceiverActivity : AppCompatActivity() {
         bar()
     }
 
-    fun onPlay(@Suppress("UNUSED_PARAMETER") view: View) {
-        if (pause) {
-            mediaplayer.start()
-            pause = false
-            PLAY.setImageResource(android.R.drawable.ic_media_pause)
+    fun onMute(@Suppress("UNUSED_PARAMETER") view: View) {
+        if (muted) {
+            mediaplayer.setVolume(1.0.toFloat(),1.0.toFloat())
+            muted = false
+            MUTE.setImageResource(android.R.drawable.ic_lock_silent_mode_off)
         } else {
-            mediaplayer.pause()
-            pause = true
-            PLAY.setImageResource(android.R.drawable.ic_media_play)
+            mediaplayer.setVolume(0.0.toFloat(),0.0.toFloat())
+            muted = true
+            MUTE.setImageResource(android.R.drawable.ic_lock_silent_mode)
         }
     }
 
@@ -231,7 +231,7 @@ class ReceiverActivity : AppCompatActivity() {
             val root = Environment.getExternalStorageDirectory().toString()
             val thisActivity = this@ReceiverActivity
             mediaplayer = MediaPlayer.create(thisActivity, Uri.parse(root + "/Music/song.mp3"))
-            var play = findViewById<ImageButton>(R.id.PLAY)
+            var play = findViewById<ImageButton>(R.id.MUTE)
             play.visibility = View.VISIBLE
         }
 
