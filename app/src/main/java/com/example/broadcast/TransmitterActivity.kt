@@ -66,11 +66,15 @@ class TransmitterActivity : AppCompatActivity() {
                     findViewById<TextView>(R.id.debug_text).text = ip
                 }
             }
-            return newChunkedResponse(Response.Status.OK, ".mp3", File(path).inputStream())
+            if (params.containsKey("Song")) {
+                return newChunkedResponse(Response.Status.OK, ".mp3", File(path).inputStream())
+            }
+            return newFixedLengthResponse("Hello world!")
         }
         fun stpServer(){
             this.stop()
         }
+
 
     }
 
@@ -298,10 +302,9 @@ class TransmitterActivity : AppCompatActivity() {
                 val time = currentTimeMillis() + latency
                 timeToStop = time
                 val stringRequest = StringRequest(Request.Method.GET, "http://$ip:63343/?timeToStop=$time",
-                    Response.Listener<String> {response -> runOnUiThread {Toast.makeText(this, response, Toast.LENGTH_LONG).show()}},
+                    Response.Listener<String> {response -> runOnUiThread {Toast.makeText(this, "$response ot $ip", Toast.LENGTH_LONG).show()}},
                     Response.ErrorListener {error -> runOnUiThread {Toast.makeText(this, error.toString(), Toast.LENGTH_SHORT).show()}})
                 queue.add(stringRequest)
-                runOnUiThread {Toast.makeText(this, ip, Toast.LENGTH_SHORT).show()}
                     }
             songRun = false
             }

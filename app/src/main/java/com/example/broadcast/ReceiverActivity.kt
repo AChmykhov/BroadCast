@@ -44,9 +44,7 @@ class ReceiverActivity : AppCompatActivity() {
             runOnUiThread {Toast.makeText(this@ReceiverActivity, "Resume signal received", Toast.LENGTH_SHORT).show()}
             runOnUiThread {Toast.makeText(this@ReceiverActivity, params.toString(), Toast.LENGTH_SHORT).show()}
             if (params.containsKey("timeToStart")) {
-                runOnUiThread {Toast.makeText(this@ReceiverActivity, params["timeToStart"].toString(), Toast.LENGTH_SHORT).show()}
                 params["timeToStart"]?.get(0)?.let { startPlaying(it) }
-                runOnUiThread {Toast.makeText(this@ReceiverActivity, "Parameter in ", Toast.LENGTH_SHORT).show()}
             }
             return newFixedLengthResponse("Hello World!")
         }
@@ -60,8 +58,9 @@ class ReceiverActivity : AppCompatActivity() {
     fun startPlaying(Time: String) {
         runOnUiThread {Toast.makeText(this, "Resume signal understood", Toast.LENGTH_SHORT).show()}
         val time = System.currentTimeMillis()
-        mediaplayer.seekTo((Time.toLong() - time).toInt())
+        Thread.sleep(Time.toLong() - time)
         mediaplayer.start()
+        pause = false
     }
 
     fun getDelay(): Int {
@@ -122,7 +121,7 @@ class ReceiverActivity : AppCompatActivity() {
             }
         }
         val ip = getData()
-        val urlStr = "http://$ip:63342/song.mp3"
+        val urlStr = "http://$ip:63342/song.mp3/?Song=true"
         try {
             DownloadFileFromURL().execute(urlStr)
         } catch (ioe: Exception) {
