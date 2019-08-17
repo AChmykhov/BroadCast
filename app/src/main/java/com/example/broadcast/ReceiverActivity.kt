@@ -170,7 +170,7 @@ class ReceiverActivity : AppCompatActivity() {
     override fun onBackPressed() {
         close()
         super.onBackPressed()
-    }
+    } 
 
     fun close() {
         mediaplayer.stop()
