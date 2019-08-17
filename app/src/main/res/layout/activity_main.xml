@@ -35,10 +35,10 @@
             app:layout_constraintEnd_toEndOf="parent">
         <com.google.android.material.textfield.TextInputEditText
                 android:layout_width="238dp"
-                android:layout_height="fill_parent"
+                android:layout_height="match_parent"
                 android:hint="@string/ip_port" android:textSize="32sp" android:inputType="textUri"
                 android:id="@+id/IPPortInput"
-                android:textColor="@color/text"/>
+                android:textColor="@color/text" android:scrollbarStyle="outsideOverlay"/>
         <Button
                 android:text="scan QR"
                 android:layout_width="match_parent"
