@@ -2,7 +2,6 @@ package com.example.broadcast
 
 import android.app.Activity
 import android.content.Intent
-import android.net.Uri
 import android.os.Bundle
 import android.provider.MediaStore
 import android.view.View
@@ -17,9 +16,7 @@ class FileActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_file)
-    }
 
-    fun createMusicList() {
         var musicList = findViewById<ListView>(R.id.MusicList)
         adapter = MusicListAdapter(this)
         getMusic()
@@ -28,19 +25,19 @@ class FileActivity : AppCompatActivity() {
 
         musicList.setOnItemClickListener { parent, view, position, id ->
             var intent = Intent()
-            intent.setData(Uri.parse(adapter.objects[position].location))
+            intent.putExtra("path", adapter.objects[position].location)
             setResult(RESULT_OK, intent)
             onBackPressed()
         }
     }
 
     fun onExit(view: View) {
-        var intent = Intent()
-        setResult(Activity.RESULT_CANCELED, intent)
         onBackPressed()
     }
 
     override fun onBackPressed() {
+        var intent = Intent()
+        setResult(Activity.RESULT_CANCELED, intent)
         finish()
         super.onBackPressed()
     }

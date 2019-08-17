@@ -26,7 +26,6 @@ import com.google.zxing.BarcodeFormat
 import com.google.zxing.MultiFormatWriter
 import com.google.zxing.WriterException
 import com.google.zxing.common.BitMatrix
-import com.nbsp.materialfilepicker.MaterialFilePicker
 import com.nbsp.materialfilepicker.ui.FilePickerActivity
 import fi.iki.elonen.NanoHTTPD
 import kotlinx.android.synthetic.main.activity_transmitter.*
@@ -36,7 +35,6 @@ import java.io.FileOutputStream
 import java.io.IOException
 import java.lang.System.currentTimeMillis
 import java.util.*
-import java.util.regex.Pattern
 
 
 class TransmitterActivity : AppCompatActivity() {
@@ -61,7 +59,7 @@ class TransmitterActivity : AppCompatActivity() {
             val ip = session.remoteIpAddress
             if (!ipList.contains(ip) and params.containsKey("Downloaded")) {
                 ipList.add(ip)
-                runOnUiThread{
+                runOnUiThread {
                     findViewById<TextView>(R.id.debug_text).text = ip
                 }
             }
@@ -79,8 +77,7 @@ class TransmitterActivity : AppCompatActivity() {
 
             val wifiManager: WifiManager = getApplicationContext().getSystemService(Context.WIFI_SERVICE) as WifiManager
             return ipToString(wifiManager.connectionInfo.ipAddress)
-        }
-        catch (ex: Exception) {
+        } catch (ex: Exception) {
             Log.e("IP Address", ex.toString())
         }
 
@@ -152,14 +149,22 @@ class TransmitterActivity : AppCompatActivity() {
             }
         }
 
-        if (ContextCompat.checkSelfPermission(thisActivity,
-                Manifest.permission.WRITE_EXTERNAL_STORAGE)
-            != PackageManager.PERMISSION_GRANTED) {
+        if (ContextCompat.checkSelfPermission(
+                thisActivity,
+                Manifest.permission.WRITE_EXTERNAL_STORAGE
+            )
+            != PackageManager.PERMISSION_GRANTED
+        ) {
 
-            if (!(ActivityCompat.shouldShowRequestPermissionRationale(thisActivity,
-                    Manifest.permission.WRITE_EXTERNAL_STORAGE))) {
-                ActivityCompat.requestPermissions(thisActivity,
-                    arrayOf(Manifest.permission.WRITE_EXTERNAL_STORAGE), 1)
+            if (!(ActivityCompat.shouldShowRequestPermissionRationale(
+                    thisActivity,
+                    Manifest.permission.WRITE_EXTERNAL_STORAGE
+                ))
+            ) {
+                ActivityCompat.requestPermissions(
+                    thisActivity,
+                    arrayOf(Manifest.permission.WRITE_EXTERNAL_STORAGE), 1
+                )
             }
         }
 
@@ -218,7 +223,7 @@ class TransmitterActivity : AppCompatActivity() {
     }
 
 
-fun saveImage(myBitmap: Bitmap?): String {
+    fun saveImage(myBitmap: Bitmap?): String {
         val bytes = ByteArrayOutputStream()
         myBitmap!!.compress(Bitmap.CompressFormat.JPEG, 90, bytes)
         val wallpaperDirectory = File(
@@ -254,9 +259,7 @@ fun saveImage(myBitmap: Bitmap?): String {
     }
 
 
-
     fun createMusicList() {
-        var _path = ""
         val fileIntent = Intent(this, FileActivity::class.java)
         startActivityForResult(fileIntent, FILE_SYSTEM_REQUEST)
     }
@@ -274,14 +277,31 @@ fun saveImage(myBitmap: Bitmap?): String {
             val time = currentTimeMillis() + latency
             val responses = mutableListOf<String>()
             val stringRequest = StringRequest(Request.Method.GET, "http://$ip:63343/?timeToStart=$time",
-                Response.Listener<String> {response -> runOnUiThread {Toast.makeText(this, response, Toast.LENGTH_LONG).show()}},
-                Response.ErrorListener {error -> runOnUiThread {Toast.makeText(this, error.toString(), Toast.LENGTH_SHORT).show()}})
+                Response.Listener<String> { response ->
+                    runOnUiThread {
+                        Toast.makeText(
+                            this,
+                            response,
+                            Toast.LENGTH_LONG
+                        ).show()
+                    }
+                },
+                Response.ErrorListener { error ->
+                    runOnUiThread {
+                        Toast.makeText(
+                            this,
+                            error.toString(),
+                            Toast.LENGTH_SHORT
+                        ).show()
+                    }
+                })
             queue.add(stringRequest)
-            runOnUiThread {Toast.makeText(this, ip, Toast.LENGTH_SHORT).show()}
+            runOnUiThread { Toast.makeText(this, ip, Toast.LENGTH_SHORT).show() }
         }
     }
 
     fun changeSong() {
+        /*
         MaterialFilePicker()
             .withActivity(this)
             .withRequestCode(1000)
@@ -289,24 +309,29 @@ fun saveImage(myBitmap: Bitmap?): String {
             .withFilterDirectories(false) // Set directories filterable (false by default)
             .withHiddenFiles(true) // Show hidden files and folders
             .start()
-
+            */
+        createMusicList()
         runSongServer(path)
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        val resultPath = data?.getStringExtra(FilePickerActivity.RESULT_FILE_PATH)
-        if (resultPath == null) {
-            Toast.makeText(this, "Problem with file path parsing", Toast.LENGTH_LONG).show()
-        } else {
-            super.onActivityResult(requestCode, resultCode, data)
+        super.onActivityResult(requestCode, resultCode, data)
 
-
-            if (requestCode == 1000 && resultCode == Activity.RESULT_OK) {
-                path = resultPath
+        when (requestCode) {
+            1000 -> {
+                val resultPath = data?.getStringExtra(FilePickerActivity.RESULT_FILE_PATH)
+                if (resultPath == null) {
+                    Toast.makeText(this, "Problem with file path parsing", Toast.LENGTH_LONG).show()
+                } else {
+                    if (resultCode == Activity.RESULT_OK)
+                        path = resultPath
+                }
             }
 
-            if (requestCode == FILE_SYSTEM_REQUEST && resultCode == Activity.RESULT_OK) {
-                path = data.data.toString()
+            FILE_SYSTEM_REQUEST -> {
+                if (resultCode == Activity.RESULT_OK) {
+                    path = data!!.getStringExtra("path")!!
+                }
             }
         }
     }
