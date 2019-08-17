@@ -6,5 +6,11 @@
     <color name="colorReceiverBackground">#ffffff</color>
     <color name="colorBar">#ffeeff</color>
     <color name="black">#000000</color>
+    <color name="background">#fff9c4</color>
+    <color name="backgroundDark">#cbc693</color>
+    <color name="backgroundLight">#fffff7</color>
+    <color name="text">#000000</color>
+    <color name="textDark">#000000</color>
+    <color name="textLight">#2c2c2c</color>
     <color name="white">#ffffff</color>
 </resources>

@@ -151,17 +151,6 @@ class ReceiverActivity : AppCompatActivity() {
         bar()
     }
 
-    fun onPlay(@Suppress("UNUSED_PARAMETER") view: View) {
-        if (pause) {
-            mediaplayer.start()
-            pause = false
-            PLAY.setImageResource(android.R.drawable.ic_media_pause)
-        } else {
-            mediaplayer.pause()
-            pause = true
-            PLAY.setImageResource(android.R.drawable.ic_media_play)
-        }
-    }
 
     fun onExit(@Suppress("UNUSED_PARAMETER") view: View) {
         close()
@@ -232,8 +221,6 @@ class ReceiverActivity : AppCompatActivity() {
             val root = Environment.getExternalStorageDirectory().toString()
             val thisActivity = this@ReceiverActivity
             mediaplayer = MediaPlayer.create(thisActivity, Uri.parse(root + "/Music/song.mp3"))
-            var play = findViewById<ImageButton>(R.id.PLAY)
-            play.visibility = View.VISIBLE
         }
 
     }
