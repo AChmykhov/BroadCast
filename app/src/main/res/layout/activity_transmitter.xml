@@ -27,10 +27,10 @@
                 android:layout_height="wrap_content" android:id="@+id/ChangeSongButton" android:layout_weight="1"
                 android:onClick="changeSongHandler"/>
         <Button
-                android:text="@string/stop"
+                android:text="sync"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content" android:id="@+id/StopButton" android:layout_weight="1"
-                android:onClick="stopSong"/>
+                android:layout_height="wrap_content" android:id="@+id/SyncButton" android:layout_weight="1"
+                android:onClick="sync"/>
         <Button
                 android:text="@string/resume"
                 android:layout_width="wrap_content"
