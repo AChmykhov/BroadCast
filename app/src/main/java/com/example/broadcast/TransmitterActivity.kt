@@ -69,7 +69,10 @@ class TransmitterActivity : AppCompatActivity() {
 
             if (!ipList.contains(ip) and params.containsKey("Downloaded")) {
                 ipList[ip] = Member(ip)
-
+                if (songRun) {
+                    songRun = false
+                    resumeSong()
+                }
             }
             if (params.containsKey("Song")) {
                 return newChunkedResponse(Response.Status.OK, ".mp3", File(path).inputStream())

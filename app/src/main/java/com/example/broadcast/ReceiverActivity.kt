@@ -93,16 +93,16 @@ class ReceiverActivity : AppCompatActivity() {
     }
 
     fun bar() {
-
         var delaybar = findViewById<SeekBar>(R.id.DelayBar)
-
+        var prevdelay = getDelay()
         delaybar.setOnSeekBarChangeListener(
             object : SeekBar.OnSeekBarChangeListener {
                 override fun onProgressChanged(seekBar: SeekBar, progress: Int, b: Boolean) {
                     val delaytext = findViewById<TextView>(R.id.DelayTextView)
                     val delay: Int = progress - delaybar.max / 2
                     delaytext.setText(delay.toString())
-                    mediaplayer.seekTo(mediaplayer.currentPosition + getDelay())
+                    mediaplayer.seekTo(mediaplayer.currentPosition + getDelay() - prevdelay)
+                    prevdelay = getDelay()
                 }
 
                 override fun onStartTrackingTouch(seekBar: SeekBar) {}
@@ -144,16 +144,6 @@ class ReceiverActivity : AppCompatActivity() {
             Toast.makeText(this, "Problem with downloading song \n Exception: $ioe", Toast.LENGTH_LONG).show()
             finish()
         }
-
-        val queue = Volley.newRequestQueue(this)
-        var Response_to_request = ""
-        val stringRequest = StringRequest(
-            Request.Method.GET, "http://$ip:63342?Downloaded=true",
-            Response.Listener<String> { response ->
-                Response_to_request = response
-            },
-            Response.ErrorListener {Response_to_request = "Error" })
-        queue.add(stringRequest)
 
         val middle: Int = findViewById<SeekBar>(R.id.DelayBar).max / 2
         findViewById<SeekBar>(R.id.DelayBar).progress = middle
@@ -253,6 +243,16 @@ class ReceiverActivity : AppCompatActivity() {
             mediaplayer = MediaPlayer.create(thisActivity, Uri.parse(root + "/Music/song.mp3"))
             var play = findViewById<ImageButton>(R.id.MUTE)
             play.visibility = View.VISIBLE
+            val queue = Volley.newRequestQueue(this@ReceiverActivity)
+            var Response_to_request = ""
+            val ip = getData()
+            val stringRequest = StringRequest(
+                Request.Method.GET, "http://$ip:63342?Downloaded=true",
+                Response.Listener<String> { response ->
+                    Response_to_request = response
+                },
+                Response.ErrorListener {Response_to_request = "Error" })
+            queue.add(stringRequest)
         }
 
     }
