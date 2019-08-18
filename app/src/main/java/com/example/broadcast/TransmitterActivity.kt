@@ -6,12 +6,15 @@ import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
+import android.media.MediaPlayer
 import android.media.MediaScannerConnection
+import android.net.Uri
 import android.net.wifi.WifiManager
 import android.os.Bundle
 import android.os.Environment
 import android.util.Log
 import android.view.View
+import android.widget.Button
 import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
@@ -40,31 +43,59 @@ import java.util.*
 class TransmitterActivity : AppCompatActivity() {
 
     var path: String = ""
-    var ipList = mutableListOf<String>()
+    var ipList = mutableMapOf<String, Member>()
+    var songRun = false
+    var timeToStart: Long = 0
+    var timeToStop: Long = 0
     private val latency = 200
     lateinit var server: SongServer
     internal var bitmap: Bitmap? = null
     private var showIPQR: ImageView? = null
     lateinit var adapter: MusicListAdapter
     val FILE_SYSTEM_REQUEST = 100
+    private var mediaplayer = MediaPlayer()
+    private var pause = true
+    private var updateRate: Long = 1000
+
 
     inner class SongServer @Throws(IOException::class) constructor() : NanoHTTPD(63342) {
 
         init {
-            start(SOCKET_READ_TIMEOUT, false)
+            this.start(SOCKET_READ_TIMEOUT, false)
         }
 
         override fun serve(session: IHTTPSession): Response {
             val params = session.parameters
             val ip = session.remoteIpAddress
+
             if (!ipList.contains(ip) and params.containsKey("Downloaded")) {
-                ipList.add(ip)
+                ipList[ip] = Member(ip)
                 runOnUiThread {
                     findViewById<TextView>(R.id.debug_text).text = ip
                 }
+
+
+
+
+
+
+
+
+
+
+
+
+
             }
-            return newChunkedResponse(Response.Status.OK, ".mp3", File(path).inputStream())
+            if (params.containsKey("Song")) {
+                return newChunkedResponse(Response.Status.OK, ".mp3", File(path).inputStream())
+            }
+            return newFixedLengthResponse("Hello world!")
         }
+        fun stpServer(){
+            this.stop()
+        }
+
 
     }
 
@@ -188,7 +219,9 @@ class TransmitterActivity : AppCompatActivity() {
         showIP.text = getLocalIpAddress()
         changeSong()
         ExitT.setOnClickListener {
+            SongServer().stpServer()
             finish()
+            runOnUiThread { Toast.makeText(this, "closed", Toast.LENGTH_SHORT).show() }
         }
     }
 
@@ -283,34 +316,73 @@ class TransmitterActivity : AppCompatActivity() {
         changeSong()
     }
 
-    fun resumeSong() {
-        for (ip in ipList) {
-            val queue = Volley.newRequestQueue(this)
-            val time = currentTimeMillis() + latency
-            val responses = mutableListOf<String>()
-            val stringRequest = StringRequest(Request.Method.GET, "http://$ip:63343/?timeToStart=$time",
-                Response.Listener<String> { response ->
-                    runOnUiThread {
-                        Toast.makeText(
-                            this,
-                            response,
-                            Toast.LENGTH_LONG
-                        ).show()
-                    }
-                },
-                Response.ErrorListener { error ->
-                    runOnUiThread {
-                        Toast.makeText(
-                            this,
-                            error.toString(),
-                            Toast.LENGTH_SHORT
-                        ).show()
-                    }
-                })
-            queue.add(stringRequest)
-            runOnUiThread { Toast.makeText(this, ip, Toast.LENGTH_SHORT).show() }
+    fun resumeSong(view: View) {
+        sync(view)
+        var button = findViewById<Button>(R.id.ResumeButton)
+        if (!songRun) {
+            mediaplayer.start()
+            var i = 0
+            for ((ip, value) in ipList) {
+                val queue = Volley.newRequestQueue(this)
+                //val time = currentTimeMillis() + value.latency + value.difference
+                val time = mediaplayer.currentPosition + value.latency
+                timeToStart = time
+                val stringRequest = StringRequest(Request.Method.POST, "http://$ip:63343/?timeToStart=$time",
+                    Response.Listener {response -> runOnUiThread {Toast.makeText(this, "$response ot $ip", Toast.LENGTH_LONG).show()}},
+                    Response.ErrorListener {error -> runOnUiThread {Toast.makeText(this, "resume error " + error.toString(), Toast.LENGTH_SHORT).show()}})
+                queue.add(stringRequest)
+                i++
+            }
+            songRun = true
+            button.text = "stop"
+        }
+        else {
+            mediaplayer.pause()
+            var i = 0
+            for ((ip, value) in ipList) {
+                val queue = Volley.newRequestQueue(this)
+                val time = currentTimeMillis() + value.latency + value.difference
+                timeToStop = time
+                val stringRequest = StringRequest(Request.Method.POST, "http://$ip:63343/?timeToStop=$time",
+                    Response.Listener {response -> runOnUiThread {Toast.makeText(this, "$response ot $ip", Toast.LENGTH_LONG).show()}},
+                    Response.ErrorListener {error -> runOnUiThread {Toast.makeText(this, "stop error" + error.toString(), Toast.LENGTH_SHORT).show()}})
+                queue.add(stringRequest)
+                i++
+            }
+            songRun = false
+            button.text = "play"
         }
     }
+
+    fun sync(view: View) {
+        var i = 0
+        for ((ip, value) in ipList) {
+            val queue = Volley.newRequestQueue(this)
+            val time = currentTimeMillis()
+            var receiverTime: Long = 0
+            val start = currentTimeMillis()
+            val stringRequest = StringRequest(Request.Method.GET, "http://$ip:63343/?currentTime=$time",
+                Response.Listener {response ->
+                    receiverTime = response.toLong()
+                    val finish = currentTimeMillis()
+                    val ping = (finish - start) / 2
+                    receiverTime = receiverTime - ping
+
+                    runOnUiThread {
+                        Toast.makeText(this, "ping " + ping.toString(), Toast.LENGTH_LONG).show()
+                        Toast.makeText(this, "difference " + (receiverTime - time), Toast.LENGTH_LONG).show()
+                    }
+
+                    ipList["a"] = Member(ip,  (finish - start) / 2, receiverTime - time)
+                },
+                Response.ErrorListener {error -> runOnUiThread {Toast.makeText(this, "sync error" + error.toString(), Toast.LENGTH_SHORT).show()} }
+            )
+
+            queue.add(stringRequest)
+            i++
+        }
+    }
+
 
     fun changeSong() {
         /*
@@ -323,7 +395,6 @@ class TransmitterActivity : AppCompatActivity() {
             .start()
             */
         createMusicList()
-        runSongServer(path)
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
@@ -343,6 +414,10 @@ class TransmitterActivity : AppCompatActivity() {
             FILE_SYSTEM_REQUEST -> {
                 if (resultCode == Activity.RESULT_OK) {
                     path = data!!.getStringExtra("path")!!
+                    runOnUiThread { Toast.makeText(this, "The $path", Toast.LENGTH_SHORT).show() }
+                    runSongServer(path)
+                    runOnUiThread { Toast.makeText(this, "Server run", Toast.LENGTH_SHORT).show() }
+                    mediaplayer = MediaPlayer.create(this, Uri.parse(path))
                 }
             }
         }

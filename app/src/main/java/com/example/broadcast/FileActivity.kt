@@ -27,7 +27,7 @@ class FileActivity : AppCompatActivity() {
             var intent = Intent()
             intent.putExtra("path", adapter.objects[position].location)
             setResult(RESULT_OK, intent)
-            onBackPressed()
+            finish()
         }
     }
 

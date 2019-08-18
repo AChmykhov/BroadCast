@@ -23,6 +23,7 @@ import com.android.volley.toolbox.Volley
 import fi.iki.elonen.NanoHTTPD
 import kotlinx.android.synthetic.main.activity_receiver.*
 import java.io.BufferedInputStream
+import java.io.File
 import java.io.FileOutputStream
 import java.io.IOException
 import java.net.URL
@@ -31,7 +32,7 @@ import java.net.URL
 class ReceiverActivity : AppCompatActivity() {
 
     private var mediaplayer = MediaPlayer()
-    private var pause = true
+    private var muted = false
 
     inner class receiverServer @Throws(IOException::class) constructor() : NanoHTTPD(63343) {
 
@@ -44,10 +45,18 @@ class ReceiverActivity : AppCompatActivity() {
             runOnUiThread {Toast.makeText(this@ReceiverActivity, "Resume signal received", Toast.LENGTH_SHORT).show()}
             runOnUiThread {Toast.makeText(this@ReceiverActivity, params.toString(), Toast.LENGTH_SHORT).show()}
             if (params.containsKey("timeToStart")) {
-                runOnUiThread {Toast.makeText(this@ReceiverActivity, params["timeToStart"].toString(), Toast.LENGTH_SHORT).show()}
-                params["timeToStart"]?.get(0)?.let { startPlaying(it) }
-                runOnUiThread {Toast.makeText(this@ReceiverActivity, "Parameter in ", Toast.LENGTH_SHORT).show()}
+                params["timeToStart"]?.get(0)?.let {
+                    startPlaying(it)
+                }
             }
+            if (params.containsKey("timeToStop")) {
+                stopPlaying()
+            }
+            if (params.containsKey("currentTime")) {
+                val time = System.currentTimeMillis()
+                return newFixedLengthResponse(time.toString())
+            }
+
             return newFixedLengthResponse("Hello World!")
         }
 
@@ -57,11 +66,17 @@ class ReceiverActivity : AppCompatActivity() {
         const val ipPort = "IP:Port_of_connection"
     }
 
+    fun stopPlaying() {
+        runOnUiThread {Toast.makeText(this, "Stop signal understood", Toast.LENGTH_SHORT).show()}
+        mediaplayer.pause()
+    }
+
     fun startPlaying(Time: String) {
         runOnUiThread {Toast.makeText(this, "Resume signal understood", Toast.LENGTH_SHORT).show()}
         val time = System.currentTimeMillis()
-        mediaplayer.seekTo((Time.toLong() - time).toInt())
+        //Thread.sleep(Time.toLong() - time)
         mediaplayer.start()
+        mediaplayer.seekTo(Time.toInt())
     }
 
     fun getDelay(): Int {
@@ -122,7 +137,7 @@ class ReceiverActivity : AppCompatActivity() {
             }
         }
         val ip = getData()
-        val urlStr = "http://$ip:63342/song.mp3"
+        val urlStr = "http://$ip:63342/song.mp3/?Song=true"
         try {
             DownloadFileFromURL().execute(urlStr)
         } catch (ioe: Exception) {
@@ -151,6 +166,17 @@ class ReceiverActivity : AppCompatActivity() {
         bar()
     }
 
+    fun onMute(@Suppress("UNUSED_PARAMETER") view: View) {
+        if (muted) {
+            mediaplayer.setVolume(1.0.toFloat(),1.0.toFloat())
+            muted = false
+            MUTE.setImageResource(android.R.drawable.ic_lock_silent_mode)
+        } else {
+            mediaplayer.setVolume(0.0.toFloat(),0.0.toFloat())
+            muted = true
+            MUTE.setImageResource(android.R.drawable.ic_lock_silent_mode_off)
+        }
+    }
 
     fun onExit(@Suppress("UNUSED_PARAMETER") view: View) {
         close()
@@ -190,6 +216,10 @@ class ReceiverActivity : AppCompatActivity() {
                 val conection = url.openConnection()
                 conection.connect()
 
+                var dir = File(Environment.getExternalStorageDirectory().toString() + "/Music")
+                if (!dir.exists())
+                    dir.mkdirs()
+
                 val input = BufferedInputStream(url.openStream(), 8192)
                 val output = FileOutputStream(
                     Environment.getExternalStorageDirectory().toString() + "/Music/song.mp3"
@@ -221,6 +251,8 @@ class ReceiverActivity : AppCompatActivity() {
             val root = Environment.getExternalStorageDirectory().toString()
             val thisActivity = this@ReceiverActivity
             mediaplayer = MediaPlayer.create(thisActivity, Uri.parse(root + "/Music/song.mp3"))
+            var play = findViewById<ImageButton>(R.id.MUTE)
+            play.visibility = View.VISIBLE
         }
 
     }

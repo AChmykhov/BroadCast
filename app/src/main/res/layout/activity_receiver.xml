@@ -61,7 +61,7 @@
                 android:layout_height="wrap_content"
                 android:id="@+id/DelayBar"
                 android:progress="100"
-                android:max="20000"
+                android:max="200"
                 android:progressTint="@color/colorBar"
                 android:background="@color/backgroundDark"
                 android:progressBackgroundTint="@color/colorBar"/>
@@ -84,6 +84,16 @@
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent" android:onClick="onExit"
             android:background="@color/backgroundDark"/>
+    <ImageButton
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" app:srcCompat="@android:drawable/ic_lock_silent_mode_off"
+            android:id="@+id/MUTE"
+            android:layout_marginTop="8dp" app:layout_constraintTop_toBottomOf="@+id/linearLayout2"
+            app:layout_constraintBottom_toBottomOf="parent" android:layout_marginBottom="8dp"
+            app:layout_constraintStart_toStartOf="parent" android:layout_marginStart="176dp"
+            app:layout_constraintVertical_bias="0.434" android:layout_marginEnd="8dp"
+            app:layout_constraintEnd_toEndOf="parent" app:layout_constraintHorizontal_bias="0.005"
+            android:onClick="onMute" android:contentDescription="@string/todo" android:visibility="invisible"/>
     <ImageButton
             android:layout_width="50dp"
             android:layout_height="50dp" app:srcCompat="@drawable/plusbutton"
