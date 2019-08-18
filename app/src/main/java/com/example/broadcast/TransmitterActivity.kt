@@ -14,7 +14,6 @@ import android.os.Bundle
 import android.os.Environment
 import android.util.Log
 import android.view.View
-import android.widget.Button
 import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
@@ -70,21 +69,6 @@ class TransmitterActivity : AppCompatActivity() {
 
             if (!ipList.contains(ip) and params.containsKey("Downloaded")) {
                 ipList[ip] = Member(ip)
-                runOnUiThread {
-                    findViewById<TextView>(R.id.debug_text).text = ip
-                }
-
-
-
-
-
-
-
-
-
-
-
-
 
             }
             if (params.containsKey("Song")) {
@@ -145,19 +129,6 @@ class TransmitterActivity : AppCompatActivity() {
         setContentView(R.layout.activity_transmitter)
         findViewById<TextView>(R.id.ShowIPTextView).text = getData()
         var wasButtonPressed = false
-        PlayPauseButton.setOnClickListener{
-            if (wasButtonPressed){
-                resumeSong()
-                PlayPauseButton.setImageResource(R.drawable.playbutton)
-                wasButtonPressed = false
-
-            }
-            else{
-                resumeSong()
-                PlayPauseButton.setImageResource(R.drawable.pausebutton)
-                wasButtonPressed = true
-            }
-        }
 
         val thisActivity = this@TransmitterActivity
         if (ContextCompat.checkSelfPermission(
@@ -316,9 +287,16 @@ class TransmitterActivity : AppCompatActivity() {
         changeSong()
     }
 
-    fun resumeSong(view: View) {
-        sync(view)
-        var button = findViewById<Button>(R.id.ResumeButton)
+    fun resumeSongHandler(view: View) {
+        resumeSong()
+    }
+
+    fun syncHandler(view: View) {
+        sync()
+    }
+
+    fun resumeSong() {
+        sync()
         if (!songRun) {
             mediaplayer.start()
             var i = 0
@@ -334,7 +312,7 @@ class TransmitterActivity : AppCompatActivity() {
                 i++
             }
             songRun = true
-            button.text = "stop"
+            PlayPauseButton.setImageResource(R.drawable.pausebutton)
         }
         else {
             mediaplayer.pause()
@@ -350,11 +328,11 @@ class TransmitterActivity : AppCompatActivity() {
                 i++
             }
             songRun = false
-            button.text = "play"
+            PlayPauseButton.setImageResource(R.drawable.playbutton)
         }
     }
 
-    fun sync(view: View) {
+    fun sync() {
         var i = 0
         for ((ip, value) in ipList) {
             val queue = Volley.newRequestQueue(this)
