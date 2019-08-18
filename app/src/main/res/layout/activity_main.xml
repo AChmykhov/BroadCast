@@ -5,59 +5,47 @@
         xmlns:app="http://schemas.android.com/apk/res-auto"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        tools:context=".MainActivity">
+        tools:context=".MainActivity" android:background="@color/background">
 
     <Button
+            android:text="@string/join_party"
+            android:layout_width="fill_parent"
+            android:layout_height="171dp"
+            android:id="@+id/joinButton"
+            android:layout_weight="1"
+            android:textSize="20sp"
+            android:onClick="joinParty"
+            app:layout_constraintBottom_toTopOf="@+id/StartPartyButton" android:background="@android:color/transparent"
+            app:layout_constraintStart_toStartOf="parent" app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="1.0"/>
+    <Button
             android:text="@string/start_party"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
+            android:layout_width="fill_parent"
+            android:layout_height="230dp"
             android:id="@+id/StartPartyButton" android:textSize="30sp"
             app:layout_constraintStart_toStartOf="parent"
-            android:layout_marginTop="58dp"
-            app:layout_constraintTop_toBottomOf="@+id/textView"
             app:layout_constraintEnd_toEndOf="parent"
-            android:onClick="startParty"/>
-    <TextView
-            android:text="@string/or_you_can"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:id="@+id/textView"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="parent" app:layout_constraintBottom_toBottomOf="parent"/>
+            android:onClick="startParty" android:background="@color/backgroundDark"
+            app:layout_constraintBottom_toBottomOf="parent"/>
     <LinearLayout
             android:orientation="horizontal"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:id="@+id/linearLayout" android:layout_marginTop="154dp"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintStart_toStartOf="parent" app:layout_constraintHorizontal_bias="1.0"
-            android:layout_marginBottom="8dp" app:layout_constraintBottom_toTopOf="@+id/textView">
+            android:layout_width="fill_parent"
+            android:layout_height="153dp"
+            app:layout_constraintBottom_toTopOf="@+id/joinButton" app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent">
         <com.google.android.material.textfield.TextInputEditText
-                android:layout_width="224dp"
-                android:layout_height="wrap_content"
-                android:hint="@string/ip_port" android:textSize="20sp" android:inputType="textUri"
-                android:id="@+id/IPPortInput"/>
+                android:layout_width="238dp"
+                android:layout_height="match_parent"
+                android:hint="@string/ip_port" android:textSize="32sp" android:inputType="textUri"
+                android:id="@+id/IPPortInput"
+                android:textColor="@color/text" android:scrollbarStyle="outsideOverlay"/>
         <Button
-                android:text="@string/join_party"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:id="@+id/JoinButton"
-                android:layout_weight="1"
-                android:textSize="20sp"
-                android:onClick="joinParty"/>
+                android:text="scan QR"
+                android:layout_width="match_parent"
+                android:layout_height="80dp"
+                android:id="@+id/buttonQR"
+                android:layout_marginEnd="16dp"
+                android:onClick="scanQR" android:background="@color/backgroundDark"/>
     </LinearLayout>
-    <Button
-            android:text="or scan QR"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:id="@+id/buttonQR"
-            app:layout_constraintStart_toStartOf="parent" android:layout_marginStart="8dp"
-            android:layout_marginTop="8dp" app:layout_constraintTop_toBottomOf="@+id/linearLayout"
-            app:layout_constraintEnd_toEndOf="parent" android:layout_marginEnd="8dp" android:layout_marginBottom="8dp"
-            app:layout_constraintBottom_toTopOf="@+id/StartPartyButton" app:layout_constraintHorizontal_bias="0.0"
-            app:layout_constraintVertical_bias="0.0"
-            android:onClick="scanQR"/>
 
 </androidx.constraintlayout.widget.ConstraintLayout>
