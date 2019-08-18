@@ -144,6 +144,20 @@ class TransmitterActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_transmitter)
         findViewById<TextView>(R.id.ShowIPTextView).text = getData()
+        var wasButtonPressed = false
+        PlayPauseButton.setOnClickListener{
+            if (wasButtonPressed){
+                resumeSong()
+                PlayPauseButton.setImageResource(R.drawable.playbutton)
+                wasButtonPressed = false
+
+            }
+            else{
+                resumeSong()
+                PlayPauseButton.setImageResource(R.drawable.pausebutton)
+                wasButtonPressed = true
+            }
+        }
 
         val thisActivity = this@TransmitterActivity
         if (ContextCompat.checkSelfPermission(
@@ -297,8 +311,6 @@ class TransmitterActivity : AppCompatActivity() {
         startActivityForResult(fileIntent, FILE_SYSTEM_REQUEST)
     }
 
-    fun stopSong(view: View) {
-    }
 
     fun changeSongHandler(view: View) {
         changeSong()
