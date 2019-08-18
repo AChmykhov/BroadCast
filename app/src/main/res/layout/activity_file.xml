@@ -10,11 +10,6 @@
             android:orientation="vertical"
             android:layout_width="match_parent"
             android:layout_height="match_parent">
-        <Button
-                android:text="@string/exit"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content" android:id="@+id/ExitFile"
-                android:onClick="onExit"/>
         <ListView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"

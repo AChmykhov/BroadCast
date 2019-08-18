@@ -34,12 +34,16 @@ class ReceiverActivity : AppCompatActivity() {
     private var mediaplayer = MediaPlayer()
     private var muted = false
     lateinit var server: receiverServer
+    private var step: Int = 20
+    private var step_latency: Int = 50
+    var delaybar: SeekBar? = null
 
     inner class receiverServer @Throws(IOException::class) constructor() : NanoHTTPD(63343) {
 
         init {
             start(SOCKET_READ_TIMEOUT, false)
         }
+
         fun stpServer() {
             val queue = Volley.newRequestQueue(this@ReceiverActivity)
             val ip = getData()
@@ -47,14 +51,22 @@ class ReceiverActivity : AppCompatActivity() {
                 com.android.volley.Response.Listener { response ->
                     this.stop()
                 },
-                com.android.volley.Response.ErrorListener { error -> runOnUiThread {Toast.makeText(this@ReceiverActivity, "exit error " + error.toString(), Toast.LENGTH_SHORT).show()}})
+                com.android.volley.Response.ErrorListener { error ->
+                    runOnUiThread {
+                        Toast.makeText(
+                            this@ReceiverActivity,
+                            "exit error " + error.toString(),
+                            Toast.LENGTH_SHORT
+                        ).show()
+                    }
+                })
             queue.add(stringRequest)
         }
 
         override fun serve(session: IHTTPSession): Response {
             val params = session.parameters
-            runOnUiThread {Toast.makeText(this@ReceiverActivity, "Resume signal received", Toast.LENGTH_SHORT).show()}
-            runOnUiThread {Toast.makeText(this@ReceiverActivity, params.toString(), Toast.LENGTH_SHORT).show()}
+            runOnUiThread { Toast.makeText(this@ReceiverActivity, "Resume signal received", Toast.LENGTH_SHORT).show() }
+            runOnUiThread { Toast.makeText(this@ReceiverActivity, params.toString(), Toast.LENGTH_SHORT).show() }
             if (params.containsKey("timeToStart")) {
                 params["timeToStart"]?.get(0)?.let {
                     startPlaying(it)
@@ -79,12 +91,12 @@ class ReceiverActivity : AppCompatActivity() {
     }
 
     fun stopPlaying() {
-        runOnUiThread {Toast.makeText(this, "Stop signal understood", Toast.LENGTH_SHORT).show()}
+        runOnUiThread { Toast.makeText(this, "Stop signal understood", Toast.LENGTH_SHORT).show() }
         mediaplayer.pause()
     }
 
     fun startPlaying(Time: String) {
-        runOnUiThread {Toast.makeText(this, "Resume signal understood", Toast.LENGTH_SHORT).show()}
+        runOnUiThread { Toast.makeText(this, "Resume signal understood", Toast.LENGTH_SHORT).show() }
         val time = System.currentTimeMillis()
         //Thread.sleep(Time.toLong() - time)
         mediaplayer.start()
@@ -104,17 +116,30 @@ class ReceiverActivity : AppCompatActivity() {
         server = receiverServer()
     }
 
+    fun plusProgress(view: View) {
+        if (delaybar!!.max > delaybar!!.progress + step)
+            delaybar!!.setProgress(delaybar!!.progress + step)
+        else
+            delaybar!!.setProgress(delaybar!!.max)
+    }
+
+    fun minusProgress(view: View) {
+        if (0 < delaybar!!.progress - step)
+            delaybar!!.setProgress(delaybar!!.progress - step)
+        else
+            delaybar!!.setProgress(0)
+    }
+
     fun bar() {
-        var delaybar = findViewById<SeekBar>(R.id.DelayBar)
-        var prevdelay = getDelay()
-        delaybar.setOnSeekBarChangeListener(
+        var prevdelay = delaybar!!.progress
+        delaybar!!.setOnSeekBarChangeListener(
             object : SeekBar.OnSeekBarChangeListener {
                 override fun onProgressChanged(seekBar: SeekBar, progress: Int, b: Boolean) {
                     val delaytext = findViewById<TextView>(R.id.DelayTextView)
-                    val delay: Int = progress - delaybar.max / 2
+                    val delay: Int = progress - delaybar!!.max / 2
                     delaytext.setText(delay.toString())
-                    mediaplayer.seekTo(mediaplayer.currentPosition + getDelay() - prevdelay)
-                    prevdelay = getDelay()
+                    mediaplayer.seekTo(mediaplayer.currentPosition + delaybar!!.progress - prevdelay + step_latency)
+                    prevdelay = delaybar!!.progress
                 }
 
                 override fun onStartTrackingTouch(seekBar: SeekBar) {}
@@ -124,10 +149,11 @@ class ReceiverActivity : AppCompatActivity() {
         )
     }
 
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_receiver)
-
+        delaybar = findViewById<SeekBar>(R.id.DelayBar)
         val textview = findViewById<TextView>(R.id.IPPortReceiverTextView)
         textview.setText(getData())
         val thisActivity = this@ReceiverActivity
@@ -170,11 +196,11 @@ class ReceiverActivity : AppCompatActivity() {
 
     fun onMute(@Suppress("UNUSED_PARAMETER") view: View) {
         if (muted) {
-            mediaplayer.setVolume(1.0.toFloat(),1.0.toFloat())
+            mediaplayer.setVolume(1.0.toFloat(), 1.0.toFloat())
             muted = false
             MUTE.setImageResource(R.drawable.unmutebutton)
         } else {
-            mediaplayer.setVolume(0.0.toFloat(),0.0.toFloat())
+            mediaplayer.setVolume(0.0.toFloat(), 0.0.toFloat())
             muted = true
             MUTE.setImageResource(R.drawable.mutebutton)
         }
@@ -187,7 +213,7 @@ class ReceiverActivity : AppCompatActivity() {
     override fun onBackPressed() {
         close()
         super.onBackPressed()
-    } 
+    }
 
     fun close() {
         server.stpServer()
@@ -264,7 +290,7 @@ class ReceiverActivity : AppCompatActivity() {
                 Response.Listener<String> { response ->
                     Response_to_request = response
                 },
-                Response.ErrorListener {Response_to_request = "Error" })
+                Response.ErrorListener { Response_to_request = "Error" })
             queue.add(stringRequest)
         }
 

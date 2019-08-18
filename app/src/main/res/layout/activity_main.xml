@@ -13,11 +13,10 @@
             android:layout_weight="1"
             android:textSize="20sp"
             android:onClick="joinParty"
-            app:layout_constraintBottom_toTopOf="@+id/StartPartyButton" android:background="@color/transparent"
+            app:layout_constraintBottom_toTopOf="@+id/StartPartyButton" android:background="@android:color/transparent"
             app:layout_constraintStart_toStartOf="parent" app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/linearLayout" android:layout_width="0dp"
-            android:layout_height="0dp" android:layout_marginStart="8dp" android:layout_marginTop="8dp"
-            android:layout_marginEnd="8dp" android:layout_marginBottom="8dp"/>
+            app:layout_constraintTop_toBottomOf="@+id/linearLayout" android:layout_width="fill_parent"
+            android:layout_height="0dp" android:layout_marginEnd="8dp" android:layout_marginStart="8dp"/>
     <Button
             android:text="@string/start_party"
             android:layout_width="fill_parent"
@@ -34,12 +33,11 @@
             android:layout_height="203dp"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent" app:layout_constraintTop_toTopOf="parent"
-            android:id="@+id/linearLayout" android:layout_marginStart="8dp" android:layout_marginTop="8dp"
-            android:layout_marginEnd="8dp">
+            android:id="@+id/linearLayout">
         <com.google.android.material.textfield.TextInputEditText
                 android:layout_width="238dp"
                 android:layout_height="match_parent"
-                android:hint="@string/ip_port" android:textSize="24sp" android:inputType="textUri"
+                android:hint="@string/ip" android:textSize="32sp" android:inputType="textUri"
                 android:id="@+id/IPPortInput"
                 android:textColor="@color/text" android:scrollbarStyle="outsideOverlay"/>
         <Button
