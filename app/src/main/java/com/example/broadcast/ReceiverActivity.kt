@@ -33,11 +33,22 @@ class ReceiverActivity : AppCompatActivity() {
 
     private var mediaplayer = MediaPlayer()
     private var muted = false
+    lateinit var server: receiverServer
 
     inner class receiverServer @Throws(IOException::class) constructor() : NanoHTTPD(63343) {
 
         init {
             start(SOCKET_READ_TIMEOUT, false)
+        }
+        fun stpServer() {
+            val queue = Volley.newRequestQueue(this@ReceiverActivity)
+            val ip = getData()
+            val stringRequest = StringRequest(Request.Method.POST, "http://$ip:63342/?Exit=true",
+                com.android.volley.Response.Listener { response ->
+                    this.stop()
+                },
+                com.android.volley.Response.ErrorListener { error -> runOnUiThread {Toast.makeText(this@ReceiverActivity, "exit error " + error.toString(), Toast.LENGTH_SHORT).show()}})
+            queue.add(stringRequest)
         }
 
         override fun serve(session: IHTTPSession): Response {
@@ -52,6 +63,7 @@ class ReceiverActivity : AppCompatActivity() {
             if (params.containsKey("timeToStop")) {
                 stopPlaying()
             }
+
             if (params.containsKey("currentTime")) {
                 val time = System.currentTimeMillis()
                 return newFixedLengthResponse(time.toString())
@@ -89,20 +101,20 @@ class ReceiverActivity : AppCompatActivity() {
     }
 
     fun runServer() {
-        receiverServer()
+        server = receiverServer()
     }
 
     fun bar() {
-
         var delaybar = findViewById<SeekBar>(R.id.DelayBar)
-
+        var prevdelay = getDelay()
         delaybar.setOnSeekBarChangeListener(
             object : SeekBar.OnSeekBarChangeListener {
                 override fun onProgressChanged(seekBar: SeekBar, progress: Int, b: Boolean) {
                     val delaytext = findViewById<TextView>(R.id.DelayTextView)
                     val delay: Int = progress - delaybar.max / 2
                     delaytext.setText(delay.toString())
-                    mediaplayer.seekTo(mediaplayer.currentPosition + getDelay())
+                    mediaplayer.seekTo(mediaplayer.currentPosition + getDelay() - prevdelay)
+                    prevdelay = getDelay()
                 }
 
                 override fun onStartTrackingTouch(seekBar: SeekBar) {}
@@ -145,16 +157,6 @@ class ReceiverActivity : AppCompatActivity() {
             finish()
         }
 
-        val queue = Volley.newRequestQueue(this)
-        var Response_to_request = ""
-        val stringRequest = StringRequest(
-            Request.Method.GET, "http://$ip:63342?Downloaded=true",
-            Response.Listener<String> { response ->
-                Response_to_request = response
-            },
-            Response.ErrorListener {Response_to_request = "Error" })
-        queue.add(stringRequest)
-
         val middle: Int = findViewById<SeekBar>(R.id.DelayBar).max / 2
         findViewById<SeekBar>(R.id.DelayBar).progress = middle
         val min = findViewById<TextView>(R.id.MinimumTextView)
@@ -188,6 +190,7 @@ class ReceiverActivity : AppCompatActivity() {
     } 
 
     fun close() {
+        server.stpServer()
         mediaplayer.stop()
         finish()
     }
@@ -253,6 +256,16 @@ class ReceiverActivity : AppCompatActivity() {
             mediaplayer = MediaPlayer.create(thisActivity, Uri.parse(root + "/Music/song.mp3"))
             var play = findViewById<ImageButton>(R.id.MUTE)
             play.visibility = View.VISIBLE
+            val queue = Volley.newRequestQueue(this@ReceiverActivity)
+            var Response_to_request = ""
+            val ip = getData()
+            val stringRequest = StringRequest(
+                Request.Method.GET, "http://$ip:63342?Downloaded=true",
+                Response.Listener<String> { response ->
+                    Response_to_request = response
+                },
+                Response.ErrorListener {Response_to_request = "Error" })
+            queue.add(stringRequest)
         }
 
     }
