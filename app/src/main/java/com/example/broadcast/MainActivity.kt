@@ -13,6 +13,8 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import com.google.android.material.textfield.TextInputEditText
+import java.util.regex.Matcher
+import java.util.regex.Pattern
 
 class MainActivity : AppCompatActivity() {
     private val PICK_CONTACT_REQUEST = 1
@@ -72,6 +74,8 @@ class MainActivity : AppCompatActivity() {
     fun joinParty(@Suppress("UNUSED_PARAMETER") view: View) {
         val data = findViewById<TextInputEditText>(R.id.IPPortInput)
         val wifiManager = applicationContext.getSystemService(Context.WIFI_SERVICE) as WifiManager
+        //Pattern ipPattern = Pattern.compile("^\\d?\\d?\\d\\.\\d?\\d?\\d\\.\\d?\\d?\\d$")
+        //Matcher ipMatch = ipPattern.matcher
         if (data.text.toString() == "") {
             Toast.makeText(this, "No IP address entered", Toast.LENGTH_LONG).show()
         } else {
