@@ -35,9 +35,9 @@
             app:layout_constraintEnd_toEndOf="parent" app:layout_constraintTop_toTopOf="parent"
             android:id="@+id/linearLayout" android:layout_marginStart="16dp">
         <com.google.android.material.textfield.TextInputEditText
-                android:layout_width="238dp"
+                android:layout_width="197dp"
                 android:layout_height="match_parent"
-                android:hint="@string/ip" android:textSize="20sp" android:inputType="textUri"
+                android:hint="@string/ip" android:textSize="16sp" android:inputType="textUri"
                 android:id="@+id/IPPortInput"
                 android:textColor="@color/text" android:scrollbarStyle="outsideOverlay"
                 android:background="@color/transparent" android:textAlignment="textStart"/>
