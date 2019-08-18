@@ -39,6 +39,9 @@ class ReceiverActivity : AppCompatActivity() {
         init {
             start(SOCKET_READ_TIMEOUT, false)
         }
+        fun stpServer() {
+            this.stop()
+        }
 
         override fun serve(session: IHTTPSession): Response {
             val params = session.parameters
@@ -178,6 +181,7 @@ class ReceiverActivity : AppCompatActivity() {
     } 
 
     fun close() {
+        receiverServer().stpServer()
         mediaplayer.stop()
         finish()
     }
