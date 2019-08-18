@@ -198,11 +198,11 @@ class ReceiverActivity : AppCompatActivity() {
         if (muted) {
             mediaplayer.setVolume(1.0.toFloat(), 1.0.toFloat())
             muted = false
-            MUTE.setImageResource(R.drawable.mutebutton)
+            MUTE.setImageResource(R.drawable.unmutebutton)
         } else {
             mediaplayer.setVolume(0.0.toFloat(), 0.0.toFloat())
             muted = true
-            MUTE.setImageResource(R.drawable.unmutebutton)
+            MUTE.setImageResource(R.drawable.mutebutton)
         }
     }
 

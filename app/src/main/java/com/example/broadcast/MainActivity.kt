@@ -8,6 +8,7 @@ import android.content.pm.PackageManager
 import android.net.wifi.WifiManager
 import android.os.Bundle
 import android.view.View
+import android.widget.Button
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
@@ -55,6 +56,7 @@ class MainActivity : AppCompatActivity() {
                 if (resultCode == Activity.RESULT_OK) {
                     var data = findViewById<TextInputEditText>(R.id.IPPortInput)
                     data.setText(intent?.data.toString())
+                    joinParty(findViewById<Button>(R.id.joinButton))
                 }
             }
         }
