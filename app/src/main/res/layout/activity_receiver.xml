@@ -71,11 +71,12 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:id="@+id/IPPortReceiverTextView" android:textSize="25sp"
-            app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintBottom_toTopOf="@+id/linearLayout3"
             android:layout_marginTop="8dp"
             app:layout_constraintTop_toTopOf="parent" android:layout_marginBottom="8dp"
-            android:layout_marginStart="50dp" android:textColor="@color/text"/>
+            android:textColor="@color/text" android:layout_marginStart="8dp"
+            app:layout_constraintStart_toStartOf="parent" android:layout_marginEnd="8dp"
+            app:layout_constraintEnd_toEndOf="parent" app:layout_constraintHorizontal_bias="0.18"/>
     <Button
             android:text="@string/exit"
             android:layout_width="wrap_content"
@@ -85,15 +86,16 @@
             app:layout_constraintEnd_toEndOf="parent" android:onClick="onExit"
             android:background="@color/backgroundDark"/>
     <ImageButton
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content" app:srcCompat="@android:drawable/ic_lock_silent_mode_off"
+            android:layout_width="50dp"
+            android:layout_height="50dp" app:srcCompat="@drawable/mutebutton"
             android:id="@+id/MUTE"
             android:layout_marginTop="8dp" app:layout_constraintTop_toBottomOf="@+id/linearLayout2"
             app:layout_constraintBottom_toBottomOf="parent" android:layout_marginBottom="8dp"
-            app:layout_constraintStart_toStartOf="parent" android:layout_marginStart="176dp"
-            app:layout_constraintVertical_bias="0.434" android:layout_marginEnd="8dp"
-            app:layout_constraintEnd_toEndOf="parent" app:layout_constraintHorizontal_bias="0.005"
-            android:onClick="onMute" android:contentDescription="@string/todo" android:visibility="invisible"/>
+            app:layout_constraintStart_toStartOf="parent" android:layout_marginStart="8dp"
+            app:layout_constraintVertical_bias="0.501" android:layout_marginEnd="8dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            android:onClick="onMute" android:contentDescription="@string/todo" android:visibility="visible"
+            android:background="@color/backgroundDark"/>
     <ImageButton
             android:layout_width="50dp"
             android:layout_height="50dp" app:srcCompat="@drawable/plusbutton"
@@ -109,6 +111,7 @@
             app:layout_constraintTop_toBottomOf="@+id/linearLayout2" app:layout_constraintStart_toStartOf="parent"
             android:layout_marginStart="8dp"
             app:layout_constraintEnd_toStartOf="@+id/PlusButton" android:layout_marginEnd="100dp"
-            android:background="@color/backgroundDark" tools:srcCompat="@drawable/minusbutton"/>
+            android:background="@color/backgroundDark" tools:srcCompat="@drawable/minusbutton"
+    />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
