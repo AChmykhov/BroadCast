@@ -62,9 +62,9 @@
                 android:id="@+id/DelayBar"
                 android:progress="100"
                 android:max="200"
-                android:progressTint="@color/colorBar"
+                android:progressTint="@color/backgroundLight"
                 android:background="@color/backgroundDark"
-                android:progressBackgroundTint="@color/colorBar"/>
+                android:progressBackgroundTint="@color/backgroundLight"/>
     </LinearLayout>
     <TextView
             android:text="@string/ip_port"
@@ -103,7 +103,8 @@
             android:background="@color/backgroundDark" app:layout_constraintTop_toBottomOf="@+id/linearLayout2"
             app:layout_constraintStart_toEndOf="@+id/MinusButton" android:layout_marginStart="100dp"
             app:layout_constraintEnd_toEndOf="parent"
-            android:layout_marginEnd="8dp" android:layout_marginTop="8dp" tools:srcCompat="@drawable/plusbutton"/>
+            android:layout_marginEnd="8dp" android:layout_marginTop="8dp" tools:srcCompat="@drawable/plusbutton"
+            android:contentDescription="@string/type_image"/>
     <ImageButton
             android:layout_width="50dp"
             android:layout_height="50dp" app:srcCompat="@drawable/minusbutton"
@@ -112,6 +113,6 @@
             android:layout_marginStart="8dp"
             app:layout_constraintEnd_toStartOf="@+id/PlusButton" android:layout_marginEnd="100dp"
             android:background="@color/backgroundDark" tools:srcCompat="@drawable/minusbutton"
-    />
+            android:contentDescription="@string/type_image"/>
 
 </androidx.constraintlayout.widget.ConstraintLayout>
