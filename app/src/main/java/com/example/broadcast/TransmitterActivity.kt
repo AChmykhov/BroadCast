@@ -191,6 +191,7 @@ class TransmitterActivity : AppCompatActivity() {
         changeSong()
         ExitT.setOnClickListener {
             SongServer().stpServer()
+            mediaplayer.stop()
             finish()
             runOnUiThread { Toast.makeText(this, "closed", Toast.LENGTH_SHORT).show() }
         }

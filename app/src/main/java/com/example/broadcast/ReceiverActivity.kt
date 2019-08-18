@@ -33,6 +33,7 @@ class ReceiverActivity : AppCompatActivity() {
 
     private var mediaplayer = MediaPlayer()
     private var muted = false
+    var ip: String? = ""
 
     inner class receiverServer @Throws(IOException::class) constructor() : NanoHTTPD(63343) {
 
@@ -58,6 +59,13 @@ class ReceiverActivity : AppCompatActivity() {
             if (params.containsKey("currentTime")) {
                 val time = System.currentTimeMillis()
                 return newFixedLengthResponse(time.toString())
+            }
+
+            if (params.containsKey("endOfParty")) {
+                mediaplayer.stop()
+                this.stpServer()
+                finish()
+
             }
 
             return newFixedLengthResponse("Hello World!")
@@ -122,6 +130,7 @@ class ReceiverActivity : AppCompatActivity() {
         val textview = findViewById<TextView>(R.id.IPPortReceiverTextView)
         textview.setText(getData())
         val thisActivity = this@ReceiverActivity
+
         if (ContextCompat.checkSelfPermission(
                 thisActivity,
                 Manifest.permission.WRITE_EXTERNAL_STORAGE
@@ -139,24 +148,15 @@ class ReceiverActivity : AppCompatActivity() {
                 )
             }
         }
-        val ip = getData()
+        ip = getData()
         val urlStr = "http://$ip:63342/song.mp3/?Song=true"
+
         try {
             DownloadFileFromURL().execute(urlStr)
         } catch (ioe: Exception) {
             Toast.makeText(this, "Problem with downloading song \n Exception: $ioe", Toast.LENGTH_LONG).show()
             finish()
         }
-
-        val queue = Volley.newRequestQueue(this)
-        var Response_to_request = ""
-        val stringRequest = StringRequest(
-            Request.Method.GET, "http://$ip:63342?Downloaded=true",
-            Response.Listener<String> { response ->
-                Response_to_request = response
-            },
-            Response.ErrorListener {Response_to_request = "Error" })
-        queue.add(stringRequest)
 
         val middle: Int = findViewById<SeekBar>(R.id.DelayBar).max / 2
         findViewById<SeekBar>(R.id.DelayBar).progress = middle
@@ -187,10 +187,10 @@ class ReceiverActivity : AppCompatActivity() {
 
     override fun onBackPressed() {
         close()
-        super.onBackPressed()
     } 
 
     fun close() {
+        Toast.makeText(this, "closed", Toast.LENGTH_LONG).show()
         receiverServer().stpServer()
         mediaplayer.stop()
         finish()
@@ -257,6 +257,15 @@ class ReceiverActivity : AppCompatActivity() {
             mediaplayer = MediaPlayer.create(thisActivity, Uri.parse(root + "/Music/song.mp3"))
             var play = findViewById<ImageButton>(R.id.MUTE)
             play.visibility = View.VISIBLE
+            val queue = Volley.newRequestQueue(this@ReceiverActivity)
+            var Response_to_request = ""
+            val stringRequest = StringRequest(
+                Request.Method.GET, "http://$ip:63342?Downloaded=true",
+                Response.Listener<String> { response ->
+                    Response_to_request = response
+                },
+                Response.ErrorListener {Response_to_request = "Error" })
+            queue.add(stringRequest)
         }
 
     }
