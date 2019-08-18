@@ -33,6 +33,7 @@ class ReceiverActivity : AppCompatActivity() {
 
     private var mediaplayer = MediaPlayer()
     private var muted = false
+    lateinit var server: receiverServer
 
     inner class receiverServer @Throws(IOException::class) constructor() : NanoHTTPD(63343) {
 
@@ -40,7 +41,14 @@ class ReceiverActivity : AppCompatActivity() {
             start(SOCKET_READ_TIMEOUT, false)
         }
         fun stpServer() {
-            this.stop()
+            val queue = Volley.newRequestQueue(this@ReceiverActivity)
+            val ip = getData()
+            val stringRequest = StringRequest(Request.Method.POST, "http://$ip:63342/?Exit=true",
+                com.android.volley.Response.Listener { response ->
+                    this.stop()
+                },
+                com.android.volley.Response.ErrorListener { error -> runOnUiThread {Toast.makeText(this@ReceiverActivity, "exit error " + error.toString(), Toast.LENGTH_SHORT).show()}})
+            queue.add(stringRequest)
         }
 
         override fun serve(session: IHTTPSession): Response {
@@ -55,6 +63,7 @@ class ReceiverActivity : AppCompatActivity() {
             if (params.containsKey("timeToStop")) {
                 stopPlaying()
             }
+
             if (params.containsKey("currentTime")) {
                 val time = System.currentTimeMillis()
                 return newFixedLengthResponse(time.toString())
@@ -92,7 +101,7 @@ class ReceiverActivity : AppCompatActivity() {
     }
 
     fun runServer() {
-        receiverServer()
+        server = receiverServer()
     }
 
     fun bar() {
@@ -181,7 +190,7 @@ class ReceiverActivity : AppCompatActivity() {
     } 
 
     fun close() {
-        receiverServer().stpServer()
+        server.stpServer()
         mediaplayer.stop()
         finish()
     }

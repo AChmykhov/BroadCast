@@ -77,9 +77,13 @@ class TransmitterActivity : AppCompatActivity() {
             if (params.containsKey("Song")) {
                 return newChunkedResponse(Response.Status.OK, ".mp3", File(path).inputStream())
             }
+            if (params.containsKey("Exit")) {
+                ipList.remove(ip)
+                return newFixedLengthResponse("OK")
+            }
             return newFixedLengthResponse("Hello world!")
         }
-        fun stpServer(){
+        fun stpServer() {
             this.stop()
         }
 
