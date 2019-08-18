@@ -61,7 +61,7 @@
                 android:layout_height="wrap_content"
                 android:id="@+id/DelayBar"
                 android:progress="100"
-                android:max="200"
+                android:max="600"
                 android:progressTint="@color/backgroundLight"
                 android:background="@color/backgroundDark"
                 android:progressBackgroundTint="@color/backgroundLight"/>
@@ -99,7 +99,7 @@
     <ImageButton
             android:layout_width="50dp"
             android:layout_height="50dp" app:srcCompat="@drawable/plusbutton"
-            android:id="@+id/PlusButton"
+            android:id="@+id/PlusButton" android:onClick="plusProgress"
             android:background="@color/backgroundDark" app:layout_constraintTop_toBottomOf="@+id/linearLayout2"
             app:layout_constraintStart_toEndOf="@+id/MinusButton" android:layout_marginStart="100dp"
             app:layout_constraintEnd_toEndOf="parent"
@@ -108,7 +108,7 @@
     <ImageButton
             android:layout_width="50dp"
             android:layout_height="50dp" app:srcCompat="@drawable/minusbutton"
-            android:id="@+id/MinusButton" android:layout_marginTop="8dp"
+            android:id="@+id/MinusButton" android:layout_marginTop="8dp" android:onClick="minusProgress"
             app:layout_constraintTop_toBottomOf="@+id/linearLayout2" app:layout_constraintStart_toStartOf="parent"
             android:layout_marginStart="8dp"
             app:layout_constraintEnd_toStartOf="@+id/PlusButton" android:layout_marginEnd="100dp"
