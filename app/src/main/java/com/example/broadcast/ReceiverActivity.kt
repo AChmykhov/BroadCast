@@ -23,6 +23,7 @@ import com.android.volley.toolbox.Volley
 import fi.iki.elonen.NanoHTTPD
 import kotlinx.android.synthetic.main.activity_receiver.*
 import java.io.BufferedInputStream
+import java.io.File
 import java.io.FileOutputStream
 import java.io.IOException
 import java.net.URL
@@ -32,15 +33,11 @@ class ReceiverActivity : AppCompatActivity() {
 
     private var mediaplayer = MediaPlayer()
     private var muted = false
-    private var pause = true
 
     inner class receiverServer @Throws(IOException::class) constructor() : NanoHTTPD(63343) {
 
         init {
             start(SOCKET_READ_TIMEOUT, false)
-        }
-        fun stpServer() {
-            this.stop()
         }
 
         override fun serve(session: IHTTPSession): Response {
@@ -48,11 +45,18 @@ class ReceiverActivity : AppCompatActivity() {
             runOnUiThread {Toast.makeText(this@ReceiverActivity, "Resume signal received", Toast.LENGTH_SHORT).show()}
             runOnUiThread {Toast.makeText(this@ReceiverActivity, params.toString(), Toast.LENGTH_SHORT).show()}
             if (params.containsKey("timeToStart")) {
-                params["timeToStart"]?.get(0)?.let { startPlaying(it) }
+                params["timeToStart"]?.get(0)?.let {
+                    startPlaying(it)
+                }
             }
             if (params.containsKey("timeToStop")) {
-                params["timeToStop"]?.get(0)?.let { startPlaying(it) }
+                stopPlaying()
             }
+            if (params.containsKey("currentTime")) {
+                val time = System.currentTimeMillis()
+                return newFixedLengthResponse(time.toString())
+            }
+
             return newFixedLengthResponse("Hello World!")
         }
 
@@ -62,17 +66,17 @@ class ReceiverActivity : AppCompatActivity() {
         const val ipPort = "IP:Port_of_connection"
     }
 
+    fun stopPlaying() {
+        runOnUiThread {Toast.makeText(this, "Stop signal understood", Toast.LENGTH_SHORT).show()}
+        mediaplayer.pause()
+    }
+
     fun startPlaying(Time: String) {
         runOnUiThread {Toast.makeText(this, "Resume signal understood", Toast.LENGTH_SHORT).show()}
         val time = System.currentTimeMillis()
-        Thread.sleep(Time.toLong() - time)
-        if (pause) {
-            mediaplayer.start()
-            pause = false
-        } else {
-            mediaplayer.pause()
-            pause = true
-        }
+        //Thread.sleep(Time.toLong() - time)
+        mediaplayer.start()
+        mediaplayer.seekTo(Time.toInt())
     }
 
     fun getDelay(): Int {
@@ -166,21 +170,19 @@ class ReceiverActivity : AppCompatActivity() {
         if (muted) {
             mediaplayer.setVolume(1.0.toFloat(),1.0.toFloat())
             muted = false
-            MUTE.setImageResource(android.R.drawable.ic_lock_silent_mode_off)
+            MUTE.setImageResource(android.R.drawable.ic_lock_silent_mode)
         } else {
             mediaplayer.setVolume(0.0.toFloat(),0.0.toFloat())
             muted = true
-            MUTE.setImageResource(android.R.drawable.ic_lock_silent_mode)
+            MUTE.setImageResource(android.R.drawable.ic_lock_silent_mode_off)
         }
     }
 
     fun onExit(@Suppress("UNUSED_PARAMETER") view: View) {
-        receiverServer().stpServer()
         close()
     }
 
     override fun onBackPressed() {
-        receiverServer().stpServer()
         close()
         super.onBackPressed()
     } 
@@ -213,6 +215,10 @@ class ReceiverActivity : AppCompatActivity() {
                 val url = URL(f_url[0])
                 val conection = url.openConnection()
                 conection.connect()
+
+                var dir = File(Environment.getExternalStorageDirectory().toString() + "/Music")
+                if (!dir.exists())
+                    dir.mkdirs()
 
                 val input = BufferedInputStream(url.openStream(), 8192)
                 val output = FileOutputStream(
